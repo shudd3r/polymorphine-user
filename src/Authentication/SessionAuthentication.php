@@ -11,34 +11,42 @@
 
 namespace Polymorphine\User\Authentication;
 
-use Polymorphine\User\Authentication;
-use Polymorphine\User\Session;
-use Polymorphine\User\User;
-use Polymorphine\User\Repository;
+use Polymorphine\User;
 use Psr\Http\Message\ServerRequestInterface;
 
 
-class SessionAuthentication implements Authentication
+class SessionAuthentication implements User\Authentication
 {
-    protected const SESSION_ID = 'id';
+    protected const SESSION_USER_ID = 'id';
 
     private $session;
     private $users;
+    private $rememberToken;
 
-    public function __construct(Session $session, Repository $users)
+    public function __construct(User\Session $session, User\Repository $users)
     {
         $this->session = $session;
         $this->users   = $users;
     }
 
-    public function credential(ServerRequestInterface $request): void
+    public function credentials(ServerRequestInterface $request): void
     {
+        $cookies = $request->getCookieParams();
+
+        $this->rememberToken = $cookies['remember'] ?? null;
     }
 
-    public function user(): User
+    public function user(): User\User
     {
-        $id = $this->session->get(self::SESSION_ID);
+        if ($id = $this->session->get(self::SESSION_USER_ID)) {
+            return $this->users->getUserById($id);
+        }
 
-        return $this->users->getUserById($id);
+        if ($this->rememberToken) {
+            $user = $this->users->getUserByCookieToken($this->rememberToken);
+            $this->session->set(self::SESSION_USER_ID, $user->id());
+        }
+
+        return $this->users->guestUser();
     }
 }

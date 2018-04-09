@@ -16,7 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 interface Authentication
 {
-    public function credential(ServerRequestInterface $request): void;
+    public function credentials(ServerRequestInterface $request): void;
 
     public function user(): User;
 }
