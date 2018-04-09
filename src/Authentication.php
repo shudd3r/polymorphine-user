@@ -18,5 +18,5 @@ interface Authentication
 {
     public function credentials(ServerRequestInterface $request): void;
 
-    public function user(): User;
+    public function user(): UserEntity;
 }

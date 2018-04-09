@@ -12,15 +12,17 @@
 namespace Polymorphine\User;
 
 
-interface User
+interface UserEntity
 {
     public function id(): string;
 
     public function isLoggedIn(): bool;
 
-    public function isAdmin(): bool;
+    public function hasRole($role): bool;
 
-    public function profile($name = null);
+    public function isAllowed($action): bool;
 
-    public function config($key = null);
+    public function profile($key = null);
+
+    public function settings($key = null);
 }

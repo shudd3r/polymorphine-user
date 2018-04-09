@@ -36,7 +36,7 @@ class SessionAuthentication implements User\Authentication
         $this->rememberToken = $cookies['remember'] ?? null;
     }
 
-    public function user(): User\User
+    public function user(): User\UserEntity
     {
         if ($id = $this->session->get(self::SESSION_USER_ID)) {
             return $this->users->getUserById($id);
