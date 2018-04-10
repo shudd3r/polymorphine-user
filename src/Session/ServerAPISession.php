@@ -12,34 +12,47 @@
 namespace Polymorphine\User\Session;
 
 use Polymorphine\User\Session;
+use RuntimeException;
 
 
-class PHPSession implements Session
+class ServerAPISession implements Session
 {
+    private $sessionData;
+
     public function __construct()
     {
+        if (session_status() !== PHP_SESSION_NONE) {
+            throw new RuntimeException('Session started outside object context');
+        }
+
         session_start();
+        $this->sessionData = $_SESSION;
     }
 
     public function get(string $key, $default = null)
     {
         if (!$this->exists($key)) { return $default; }
 
-        return $_SESSION[$key];
+        return $this->sessionData[$key];
     }
 
     public function set(string $key, $value = null): void
     {
-        $_SESSION[$key] = $value;
+        $this->sessionData[$key] = $value;
     }
 
     public function exists(string $key): bool
     {
-        return array_key_exists($key, $_SESSION);
+        return array_key_exists($key, $this->sessionData);
     }
 
     public function clear(string $key): void
     {
-        unset($_SESSION[$key]);
+        unset($this->sessionData[$key]);
+    }
+
+    public function __destruct()
+    {
+        $_SESSION = $this->sessionData;
     }
 }

@@ -2,4 +2,5 @@
 vendor/
 app/
 public/
+build/
 /composer.lock
