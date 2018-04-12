@@ -12,7 +12,6 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User;
-use Psr\Http\Message\ServerRequestInterface;
 
 
 class SessionAuthentication implements User\Authentication
@@ -29,26 +28,19 @@ class SessionAuthentication implements User\Authentication
         $this->users   = $users;
     }
 
-    public function credentials(ServerRequestInterface $request): void
+    public function credentials(array $tokens): void
     {
         if ($this->authenticatedUser) { return; }
 
-        if ($id = $this->session->get(self::USER_ID_KEY)) {
+        $user = null;
+        if (isset($tokens['session']) && $id = $this->session->get(self::USER_ID_KEY)) {
             $user = $this->users->getUserById($id);
+        } elseif (isset($tokens['remember'])) {
+            $user = $this->users->getUserByCookieToken($tokens['remember']);
             $this->persistSession($user);
-            return;
         }
 
-        $cookies = $request->getCookieParams();
-        $token   = $cookies['remember'] ?? null;
-
-        if ($token) {
-            $user = $this->users->getUserByCookieToken($token);
-            $this->persistSession($user);
-            return;
-        }
-
-        $this->authenticatedUser = $this->users->guestUser();
+        $this->authenticate($user ?: $this->users->guestUser());
     }
 
     public function user(): User\UserEntity
@@ -56,15 +48,16 @@ class SessionAuthentication implements User\Authentication
         return $this->authenticatedUser ?? $this->authenticatedUser = $this->users->guestUser();
     }
 
+    private function authenticate(User\UserEntity $user)
+    {
+        if (!$user->isLoggedIn()) { $this->clearCredentials(); }
+
+        $this->authenticatedUser = $user;
+    }
+
     private function persistSession(User\UserEntity $user)
     {
-        $this->authenticatedUser = $user;
-
-        if (!$user->isLoggedIn()) {
-            $this->clearCredentials();
-        } else {
-            $this->session->set(self::USER_ID_KEY, $user->id());
-        }
+        $this->session->set(self::USER_ID_KEY, $user->id());
     }
 
     private function clearCredentials()
