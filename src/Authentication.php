@@ -14,7 +14,7 @@ namespace Polymorphine\User;
 
 interface Authentication
 {
-    public function credentials(array $tokens): void;
+    public function authenticate(array $credentials): void;
 
     public function user(): UserEntity;
 }

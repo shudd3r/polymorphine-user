@@ -28,19 +28,19 @@ class SessionAuthentication implements User\Authentication
         $this->users   = $users;
     }
 
-    public function credentials(array $tokens): void
+    public function authenticate(array $credentials): void
     {
         if ($this->authenticatedUser) { return; }
 
         $user = null;
-        if (isset($tokens['session']) && $id = $this->session->get(self::USER_ID_KEY)) {
+        if (isset($credentials['session']) && $id = $this->session->get(self::USER_ID_KEY)) {
             $user = $this->users->getUserById($id);
-        } elseif (isset($tokens['remember'])) {
-            $user = $this->users->getUserByCookieToken($tokens['remember']);
+        } elseif (isset($credentials['remember'])) {
+            $user = $this->users->getUserByCookieToken($credentials['remember']);
             $this->persistSession($user);
         }
 
-        $this->authenticate($user ?: $this->users->guestUser());
+        $this->setUser($user ?: $this->users->guestUser());
     }
 
     public function user(): User\UserEntity
@@ -48,7 +48,7 @@ class SessionAuthentication implements User\Authentication
         return $this->authenticatedUser ?? $this->authenticatedUser = $this->users->guestUser();
     }
 
-    private function authenticate(User\UserEntity $user)
+    private function setUser(User\UserEntity $user)
     {
         if (!$user->isLoggedIn()) { $this->clearCredentials(); }
 

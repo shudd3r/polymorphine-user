@@ -33,7 +33,7 @@ class SessionAuthenticationTest extends TestCase
     public function testUserIsAuthenticatedWithSessionId()
     {
         $auth = $this->auth(['id' => '334'], '334');
-        $auth->credentials(['session' => true]);
+        $auth->authenticate(['session' => true]);
 
         $this->assertSame('334', $auth->user()->id());
     }
@@ -41,7 +41,7 @@ class SessionAuthenticationTest extends TestCase
     public function testUserIsAuthenticatedWithRememberToken()
     {
         $auth = $this->auth(['id' => '334'], 'FF34E4A0');
-        $auth->credentials(['remember' => 'FF34E4A0']);
+        $auth->authenticate(['remember' => 'FF34E4A0']);
 
         $this->assertSame('FF34E4A0', $auth->user()->id());
     }
@@ -49,17 +49,17 @@ class SessionAuthenticationTest extends TestCase
     public function testNotMatchingIdAuthenticatedAsGuest()
     {
         $auth = $this->auth(['id' => '334'], '335');
-        $auth->credentials(['session' => true]);
+        $auth->authenticate(['session' => true]);
 
         $this->assertSame('', $auth->user()->id());
 
         $auth = $this->auth(['id' => '334'], '335');
-        $auth->credentials(['session' => true, 'remember' => 'ABCD']);
+        $auth->authenticate(['session' => true, 'remember' => 'ABCD']);
 
         $this->assertSame('', $auth->user()->id());
 
         $auth = $this->auth(['id' => '334'], 'ABC');
-        $auth->credentials(['remember' => 'XYZ']);
+        $auth->authenticate(['remember' => 'XYZ']);
 
         $this->assertSame('', $auth->user()->id());
     }
