@@ -12,6 +12,7 @@
 namespace Polymorphine\User\Middleware;
 
 use Polymorphine\User\AuthMiddleware;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 
@@ -25,5 +26,14 @@ class CookieAuthMiddleware extends AuthMiddleware
             'session'  => isset($cookies[session_name()]),
             'remember' => $cookies['remember'] ?? null
         ];
+    }
+
+    protected function setTokens(ResponseInterface $response): ResponseInterface
+    {
+        foreach ($this->userSession->tokens() as $name => $value) {
+            $response = $response->withAddedHeader('Set-Cookie', $value);
+        }
+
+        return $response;
     }
 }

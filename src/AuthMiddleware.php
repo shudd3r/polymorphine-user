@@ -19,19 +19,23 @@ use Psr\Http\Message\ServerRequestInterface;
 
 abstract class AuthMiddleware implements MiddlewareInterface
 {
-    protected $session;
+    protected $authentication;
+    protected $userSession;
 
-    public function __construct(Authentication $session)
+    public function __construct(Authentication $authentication, UserSession $userSession)
     {
-        $this->session = $session;
+        $this->authentication = $authentication;
+        $this->userSession    = $userSession;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $this->session->authenticate($this->credentials($request));
+        $this->authentication->authenticate($this->credentials($request));
 
-        return $handler->handle($request);
+        return $this->setTokens($handler->handle($request));
     }
 
     abstract protected function credentials(ServerRequestInterface $request): array;
+
+    abstract protected function setTokens(ResponseInterface $response): ResponseInterface;
 }
