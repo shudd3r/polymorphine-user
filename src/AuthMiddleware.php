@@ -20,12 +20,10 @@ use Psr\Http\Message\ServerRequestInterface;
 abstract class AuthMiddleware implements MiddlewareInterface
 {
     protected $authentication;
-    protected $userSession;
 
-    public function __construct(Authentication $authentication, UserSession $userSession)
+    public function __construct(Authentication $authentication)
     {
         $this->authentication = $authentication;
-        $this->userSession    = $userSession;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

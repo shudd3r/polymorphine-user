@@ -40,7 +40,13 @@ class SessionAuthentication implements User\Authentication
             $this->persistSession($user);
         }
 
-        $this->setUser($user ?: $this->users->guestUser());
+        $this->authenticatedUser = $user ?: $this->users->guestUser();
+    }
+
+    public function tokens(): array
+    {
+        //TODO: implement cookie tokens
+        return [];
     }
 
     public function user(): User\UserEntity
@@ -48,20 +54,8 @@ class SessionAuthentication implements User\Authentication
         return $this->authenticatedUser ?? $this->authenticatedUser = $this->users->guestUser();
     }
 
-    private function setUser(User\UserEntity $user)
-    {
-        if (!$user->isLoggedIn()) { $this->clearCredentials(); }
-
-        $this->authenticatedUser = $user;
-    }
-
     private function persistSession(User\UserEntity $user)
     {
         $this->session->set(self::USER_ID_KEY, $user->id());
-    }
-
-    private function clearCredentials()
-    {
-        $this->session->clear(self::USER_ID_KEY);
     }
 }

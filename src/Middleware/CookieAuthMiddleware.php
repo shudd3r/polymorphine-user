@@ -30,7 +30,7 @@ class CookieAuthMiddleware extends AuthMiddleware
 
     protected function setTokens(ResponseInterface $response): ResponseInterface
     {
-        foreach ($this->userSession->tokens() as $name => $value) {
+        foreach ($this->authentication->tokens() as $name => $value) {
             $response = $response->withAddedHeader('Set-Cookie', $value);
         }
 
