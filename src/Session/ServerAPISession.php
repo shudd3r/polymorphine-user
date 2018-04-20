@@ -29,6 +29,11 @@ class ServerAPISession implements Session
         $this->sessionData = $_SESSION;
     }
 
+    public function token(): array
+    {
+        return [session_name() => session_id()];
+    }
+
     public function get(string $key, $default = null)
     {
         if (!$this->exists($key)) { return $default; }

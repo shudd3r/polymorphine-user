@@ -14,6 +14,8 @@ namespace Polymorphine\User;
 
 interface Session
 {
+    public function token(): array;
+
     public function get(string $key, $default = null);
 
     public function set(string $key, $value = null): void;
