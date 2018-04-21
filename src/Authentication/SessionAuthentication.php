@@ -19,43 +19,25 @@ class SessionAuthentication implements User\Authentication
     protected const USER_ID_KEY = 'id';
 
     private $session;
-    private $users;
-    private $authenticatedUser;
+    private $repository;
+    private $user;
 
-    public function __construct(User\Session $session, User\Repository $users)
+    public function __construct(User\Session $session, User\Repository $repository)
     {
-        $this->session = $session;
-        $this->users   = $users;
+        $this->session    = $session;
+        $this->repository = $repository;
     }
 
     public function authenticate(array $credentials): void
     {
-        if ($this->authenticatedUser) { return; }
+        if ($this->user) { return; }
 
-        $user = null;
-        if (isset($credentials['session']) && $id = $this->session->get(self::USER_ID_KEY)) {
-            $user = $this->users->getUserById($id);
-        } elseif (isset($credentials['remember'])) {
-            $user = $this->users->getUserByCookieToken($credentials['remember']);
-            $this->persistSession($user);
-        }
-
-        $this->authenticatedUser = $user ?: $this->users->guestUser();
-    }
-
-    public function tokens(): array
-    {
-        //TODO: implement cookie tokens
-        return [];
+        $userId     = isset($credentials['session']) ? $this->session->get(self::USER_ID_KEY) : null;
+        $this->user = ($userId) ? $this->repository->getUserById($userId) : $this->repository->guestUser();
     }
 
     public function user(): User\UserEntity
     {
-        return $this->authenticatedUser ?? $this->authenticatedUser = $this->users->guestUser();
-    }
-
-    private function persistSession(User\UserEntity $user)
-    {
-        $this->session->set(self::USER_ID_KEY, $user->id());
+        return $this->user ?? $this->user = $this->repository->guestUser();
     }
 }

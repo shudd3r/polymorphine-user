@@ -30,10 +30,8 @@ abstract class AuthMiddleware implements MiddlewareInterface
     {
         $this->authentication->authenticate($this->credentials($request));
 
-        return $this->setTokens($handler->handle($request));
+        return $handler->handle($request);
     }
 
     abstract protected function credentials(ServerRequestInterface $request): array;
-
-    abstract protected function setTokens(ResponseInterface $response): ResponseInterface;
 }
