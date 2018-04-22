@@ -16,7 +16,5 @@ interface Authentication
 {
     public function authenticate(array $credentials): void;
 
-    public function tokens(): array;
-
     public function user(): UserEntity;
 }

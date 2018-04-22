@@ -32,8 +32,17 @@ class SessionAuthentication implements User\Authentication
     {
         if ($this->user) { return; }
 
-        $userId     = isset($credentials['session']) ? $this->session->get(self::USER_ID_KEY) : null;
-        $this->user = ($userId) ? $this->repository->getUserById($userId) : $this->repository->guestUser();
+        $userId = isset($credentials['session']) ? $this->session->get(self::USER_ID_KEY) : null;
+        if (!$userId) {
+            $this->user = $this->repository->guestUser();
+            return;
+        }
+
+        $this->user = $this->repository->getUserById($userId);
+
+        if (!$this->user->isLoggedIn()) {
+            $this->session->clear(self::USER_ID_KEY);
+        }
     }
 
     public function user(): User\UserEntity
