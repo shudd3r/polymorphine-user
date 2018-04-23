@@ -14,8 +14,10 @@ namespace Polymorphine\User\Authentication;
 use Polymorphine\User;
 
 
-class SessionAuthentication implements User\Authentication
+class CookieAuthentication implements User\Authentication
 {
+    protected const REMEMBER_COOKIE = 'remember';
+
     private $session;
     private $repository;
     private $user;
@@ -30,16 +32,15 @@ class SessionAuthentication implements User\Authentication
     {
         if ($this->user) { return; }
 
-        $userId = isset($credentials['session']) ? $this->session->get($this->session::USER_ID_KEY) : null;
-        if (!$userId) {
-            $this->user = $this->repository->guestUser();
-            return;
-        }
+        $cookieToken = $credentials[self::REMEMBER_COOKIE] ?? null;
+        $this->user  = ($cookieToken)
+            ? $this->repository->getUserByCookieToken($cookieToken)
+            : $this->repository->guestUser();
 
-        $this->user = $this->repository->getUserById($userId);
-
-        if (!$this->user->isLoggedIn()) {
-            $this->session->clear($this->session::USER_ID_KEY);
+        if ($this->user->isLoggedIn()) {
+            $this->session->set($this->session::USER_ID_KEY, $this->user->id());
+        } elseif ($cookieToken) {
+            //TODO: remove invalid cookie
         }
     }
 
