@@ -17,6 +17,7 @@ use Polymorphine\User;
 class CompositeAuthentication implements User\Authentication
 {
     private $authentications;
+    private $user;
 
     public function __construct(User\Authentication ...$authentications)
     {
@@ -25,9 +26,15 @@ class CompositeAuthentication implements User\Authentication
 
     public function authenticate(array $credentials): void
     {
+        foreach ($this->authentications as $auth) {
+            $auth->authenticate($credentials);
+            $this->user = $auth->user();
+            if ($this->user->isLoggedIn()) { break; }
+        }
     }
 
     public function user(): User\UserEntity
     {
+        return $this->user;
     }
 }
