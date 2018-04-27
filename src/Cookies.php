@@ -14,28 +14,41 @@ namespace Polymorphine\User;
 
 class Cookies
 {
+    private $cookies;
+    private $addedCookies = [];
+
     protected $domain;
     protected $path     = '/';
     protected $secure   = false;
     protected $httpOnly = true;
 
+    public function __construct(array $cookies)
+    {
+        $this->cookies = $cookies;
+    }
+
     public function set($name, $value, $minutes = 60)
     {
-        $expiry = time() + ($minutes * 60);
+        $options = [
+            'domain' => $this->domain,
+            'path' => $this->path,
+            'secure' => $this->secure,
+            'http' => $this->httpOnly
+        ];
 
-        setcookie($name, $value, $expiry, $this->path, $this->domain, $this->secure, $this->httpOnly);
+        $this->addedCookies[] = new Cookie($name, $value, $minutes, $options);
     }
 
     public function get($key, $default = null)
     {
-        if (!$this->exists($key)) { return $_COOKIE[$key]; }
+        if (!$this->exists($key)) { return $this->cookies[$key]; }
 
         return $default;
     }
 
     public function exists($key)
     {
-        return !empty($_COOKIE[$key]);
+        return !empty($this->cookies[$key]);
     }
 
     public function clear($key)
