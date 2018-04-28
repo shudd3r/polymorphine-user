@@ -12,6 +12,9 @@
 namespace Polymorphine\User;
 
 
+use Psr\Http\Message\ResponseInterface;
+
+
 class Cookies
 {
     private $cookies;
@@ -59,5 +62,11 @@ class Cookies
     public function permanent($key, $value)
     {
         $this->set($key, $value, 2628000);
+    }
+
+    public function setHeaders(ResponseInterface $response): ResponseInterface
+    {
+        //TODO: Set-Cookie headers
+        return $response;
     }
 }

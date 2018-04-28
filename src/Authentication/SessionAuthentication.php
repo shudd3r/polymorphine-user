@@ -26,11 +26,11 @@ class SessionAuthentication implements User\Authentication
         $this->repository = $repository;
     }
 
-    public function authenticate(array $credentials): void
+    public function authenticate(): void
     {
         if ($this->user) { return; }
 
-        $userId = isset($credentials['session']) ? $this->session->get($this->session::USER_ID_KEY) : null;
+        $userId = $this->session->get($this->session::USER_ID_KEY);
         if (!$userId) {
             $this->user = $this->repository->guestUser();
             return;

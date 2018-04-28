@@ -11,22 +11,30 @@
 
 namespace Polymorphine\User\Session;
 
+use Polymorphine\User\Cookies;
 use Polymorphine\User\Session;
 use RuntimeException;
 
 
 class ServerAPISession implements Session
 {
+    private $cookies;
     private $sessionData;
 
-    public function __construct()
+    public function __construct(Cookies $cookies)
     {
+        $this->cookies = $cookies;
+
         if (session_status() !== PHP_SESSION_NONE) {
             throw new RuntimeException('Session started outside object context');
         }
 
         session_start();
         $this->sessionData = $_SESSION;
+
+        if (!$this->cookies->exists(session_name())) {
+            $this->cookies->set(session_name(), session_id());
+        }
     }
 
     public function token(): array
