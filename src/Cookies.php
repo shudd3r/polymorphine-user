@@ -11,7 +11,6 @@
 
 namespace Polymorphine\User;
 
-
 use Psr\Http\Message\ResponseInterface;
 
 
@@ -20,53 +19,46 @@ class Cookies
     private $cookies;
     private $addedCookies = [];
 
-    protected $domain;
-    protected $path     = '/';
-    protected $secure   = false;
-    protected $httpOnly = true;
-
-    public function __construct(array $cookies)
+    public function __construct(Cookie ...$cookies)
     {
         $this->cookies = $cookies;
     }
 
-    public function set($name, $value, $minutes = 60)
+    public function set(Cookie $cookie)
     {
-        $options = [
-            'domain' => $this->domain,
-            'path' => $this->path,
-            'secure' => $this->secure,
-            'http' => $this->httpOnly
-        ];
-
-        $this->addedCookies[] = new Cookie($name, $value, $minutes, $options);
+        $name = $cookie->name();
+        $this->cookies[$name] = $cookie;
+        $this->addedCookies[] = $name;
     }
 
     public function get($key, $default = null)
     {
-        if (!$this->exists($key)) { return $this->cookies[$key]; }
+        if (!$this->exists($key)) { return $default; }
 
-        return $default;
+        return $this->cookies[$key]->value();
     }
 
     public function exists($key)
     {
-        return !empty($this->cookies[$key]);
+        return isset($this->cookies[$key]);
     }
 
     public function clear($key)
     {
-        $this->set($key, null, -2628000);
+        $this->set(new Cookie($key, null, -2628000));
     }
 
     public function permanent($key, $value)
     {
-        $this->set($key, $value, 2628000);
+        $this->set(new Cookie($key, $value, 2628000));
     }
 
     public function setHeaders(ResponseInterface $response): ResponseInterface
     {
-        //TODO: Set-Cookie headers
+        foreach ($this->addedCookies as $cookieName) {
+            $response = $response->withAddedHeader('Set-Cookie', $this->cookies[$cookieName]->headerLine());
+        }
+
         return $response;
     }
 }
