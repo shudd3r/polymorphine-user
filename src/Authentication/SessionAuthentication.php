@@ -12,6 +12,7 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User;
+use Psr\Http\Message\ServerRequestInterface;
 
 
 class SessionAuthentication implements User\Authentication
@@ -26,7 +27,7 @@ class SessionAuthentication implements User\Authentication
         $this->repository = $repository;
     }
 
-    public function authenticate(): void
+    public function authenticate(ServerRequestInterface $request): void
     {
         if ($this->user) { return; }
 

@@ -11,31 +11,25 @@
 
 namespace Polymorphine\User;
 
-use Polymorphine\User\Authentication\SessionAuthentication;
-use Polymorphine\User\Session\ServerAPISession;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 
-class CookieAuthMiddleware implements MiddlewareInterface
+class AuthMiddleware implements MiddlewareInterface
 {
-    protected $cookies;
-    protected $users;
+    private $auth;
 
-    public function __construct(Cookies $cookies, Repository $users)
+    public function __construct(Authentication $auth)
     {
-        $this->cookies = $cookies;
-        $this->users   = $users;
+        $this->auth = $auth;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $auth = new SessionAuthentication(new ServerAPISession($this->cookies), $this->users);
+        $this->auth->authenticate($request);
 
-        $auth->authenticate();
-
-        return $this->cookies->setHeaders($handler->handle($request));
+        return $handler->handle($request);
     }
 }

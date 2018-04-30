@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User;
+namespace Polymorphine\User\Cookies;
 
 use DateTime;
 use DateInterval;
@@ -50,7 +50,7 @@ class Cookie
         return $this->minutes;
     }
 
-    public function headerLine()
+    public function __toString()
     {
         $header = $this->name . '=' . $this->value;
 

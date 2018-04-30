@@ -11,7 +11,8 @@
 
 namespace Polymorphine\User\Session;
 
-use Polymorphine\User\Cookies;
+use Polymorphine\User\Cookies\CookieJar;
+use Polymorphine\User\Cookies\Cookie;
 use Polymorphine\User\Session;
 use RuntimeException;
 
@@ -21,7 +22,7 @@ class ServerAPISession implements Session
     private $cookies;
     private $sessionData;
 
-    public function __construct(Cookies $cookies)
+    public function __construct(CookieJar $cookies)
     {
         $this->cookies = $cookies;
 
@@ -33,7 +34,7 @@ class ServerAPISession implements Session
         $this->sessionData = $_SESSION;
 
         if (!$this->cookies->exists(session_name())) {
-            $this->cookies->set(session_name(), session_id());
+            $this->cookies->set(new Cookie(session_name(), session_id()));
         }
     }
 

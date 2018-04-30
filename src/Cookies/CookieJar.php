@@ -9,15 +9,16 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User;
+namespace Polymorphine\User\Cookies;
 
-use Psr\Http\Message\ResponseInterface;
+use Iterator;
 
 
-class Cookies
+class CookieJar implements Iterator
 {
     private $cookies;
     private $addedCookies = [];
+    private $pointer      = 0;
 
     public function __construct(Cookie ...$cookies)
     {
@@ -26,12 +27,12 @@ class Cookies
 
     public function set(Cookie $cookie)
     {
-        $name = $cookie->name();
+        $name                 = $cookie->name();
         $this->cookies[$name] = $cookie;
         $this->addedCookies[] = $name;
     }
 
-    public function get($key, $default = null)
+    public function getValue($key, $default = null)
     {
         if (!$this->exists($key)) { return $default; }
 
@@ -45,6 +46,8 @@ class Cookies
 
     public function clear($key)
     {
+        if (!$this->exists($key)) { return; }
+
         $this->set(new Cookie($key, null, -2628000));
     }
 
@@ -53,12 +56,28 @@ class Cookies
         $this->set(new Cookie($key, $value, 2628000));
     }
 
-    public function setHeaders(ResponseInterface $response): ResponseInterface
+    public function current()
     {
-        foreach ($this->addedCookies as $cookieName) {
-            $response = $response->withAddedHeader('Set-Cookie', $this->cookies[$cookieName]->headerLine());
-        }
+        return $this->addedCookies[$this->pointer];
+    }
 
-        return $response;
+    public function next()
+    {
+        return $this->pointer++;
+    }
+
+    public function key()
+    {
+        return $this->pointer;
+    }
+
+    public function valid()
+    {
+        return isset($this->addedCookies[$this->pointer]);
+    }
+
+    public function rewind()
+    {
+        $this->pointer = 0;
     }
 }
