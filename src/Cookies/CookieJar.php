@@ -17,19 +17,23 @@ use Iterator;
 class CookieJar implements Iterator
 {
     private $cookies;
-    private $addedCookies = [];
-    private $pointer      = 0;
+    private $modified = [];
+    private $pointer  = 0;
 
-    public function __construct(Cookie ...$cookies)
+    /**
+     * @param Cookie[] $cookies
+     */
+    public function __construct(array $cookies)
     {
         $this->cookies = $cookies;
     }
 
     public function set(Cookie $cookie)
     {
-        $name                 = $cookie->name();
+        $name = $cookie->name();
+
         $this->cookies[$name] = $cookie;
-        $this->addedCookies[] = $name;
+        $this->modified[]     = $name;
     }
 
     public function getValue($key, $default = null)
@@ -58,7 +62,9 @@ class CookieJar implements Iterator
 
     public function current()
     {
-        return $this->addedCookies[$this->pointer];
+        $name = $this->modified[$this->pointer];
+
+        return $this->cookies[$name];
     }
 
     public function next()
@@ -73,7 +79,7 @@ class CookieJar implements Iterator
 
     public function valid()
     {
-        return isset($this->addedCookies[$this->pointer]);
+        return isset($this->modified[$this->pointer]);
     }
 
     public function rewind()
