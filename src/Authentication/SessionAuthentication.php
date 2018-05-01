@@ -11,30 +11,31 @@
 
 namespace Polymorphine\User\Authentication;
 
-use Polymorphine\User;
-use Psr\Http\Message\ServerRequestInterface;
+use Polymorphine\User\Authentication;
+use Polymorphine\User\Repository;
+use Polymorphine\User\Session;
+use Polymorphine\User\UserEntity;
 
 
-class SessionAuthentication implements User\Authentication
+class SessionAuthentication implements Authentication
 {
     private $session;
     private $repository;
     private $user;
 
-    public function __construct(User\Session $session, User\Repository $repository)
+    public function __construct(Session $session, Repository $repository)
     {
         $this->session    = $session;
         $this->repository = $repository;
     }
 
-    public function authenticate(ServerRequestInterface $request): void
+    public function user(): UserEntity
     {
-        if ($this->user) { return; }
+        if ($this->user) { return $this->user; }
 
         $userId = $this->session->get($this->session::USER_ID_KEY);
         if (!$userId) {
-            $this->user = $this->repository->guestUser();
-            return;
+            return $this->user = $this->repository->guestUser();
         }
 
         $this->user = $this->repository->getUserById($userId);
@@ -42,10 +43,7 @@ class SessionAuthentication implements User\Authentication
         if (!$this->user->isLoggedIn()) {
             $this->session->clear($this->session::USER_ID_KEY);
         }
-    }
 
-    public function user(): User\UserEntity
-    {
-        return $this->user ?? $this->user = $this->repository->guestUser();
+        return $this->user;
     }
 }

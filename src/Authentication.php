@@ -11,11 +11,8 @@
 
 namespace Polymorphine\User;
 
-use Psr\Http\Message\ServerRequestInterface;
-
 
 interface Authentication
 {
-    public function authenticate(ServerRequestInterface $request): void;
     public function user(): UserEntity;
 }
