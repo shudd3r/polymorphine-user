@@ -21,7 +21,6 @@ class SessionAuthentication implements Authentication
 {
     private $session;
     private $repository;
-    private $user;
 
     public function __construct(Session $session, Repository $repository)
     {
@@ -31,19 +30,17 @@ class SessionAuthentication implements Authentication
 
     public function user(): UserEntity
     {
-        if ($this->user) { return $this->user; }
-
         $userId = $this->session->get($this->session::USER_ID_KEY);
         if (!$userId) {
-            return $this->user = $this->repository->guestUser();
+            return $this->repository->guestUser();
         }
 
-        $this->user = $this->repository->getUserById($userId);
+        $user = $this->repository->getUserById($userId);
 
-        if (!$this->user->isLoggedIn()) {
+        if (!$user->isLoggedIn()) {
             $this->session->clear($this->session::USER_ID_KEY);
         }
 
-        return $this->user;
+        return $user;
     }
 }

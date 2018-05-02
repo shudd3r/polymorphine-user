@@ -23,7 +23,6 @@ class CookieAuthentication implements Authentication
 
     private $cookies;
     private $repository;
-    private $user;
 
     public function __construct(CookieJar $cookies, Repository $repository)
     {
@@ -33,17 +32,16 @@ class CookieAuthentication implements Authentication
 
     public function user(): UserEntity
     {
-        if ($this->user) { return $this->user; }
-
         $cookieToken = $this->cookies->getValue(self::REMEMBER_COOKIE);
-        $this->user  = ($cookieToken)
+
+        $user = ($cookieToken)
             ? $this->repository->getUserByCookieToken($cookieToken)
             : $this->repository->guestUser();
 
-        if (!$this->user->isLoggedIn()) {
+        if (!$user->isLoggedIn()) {
             $this->cookies->clear(self::REMEMBER_COOKIE);
         }
 
-        return $this->user;
+        return $user;
     }
 }
