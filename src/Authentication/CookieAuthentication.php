@@ -32,7 +32,7 @@ class CookieAuthentication implements Authentication
 
     public function user(): UserEntity
     {
-        $cookieToken = $this->cookies->getValue(self::REMEMBER_COOKIE);
+        $cookieToken = $this->cookies->get(self::REMEMBER_COOKIE);
 
         $user = ($cookieToken)
             ? $this->repository->getUserByCookieToken($cookieToken)

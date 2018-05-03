@@ -11,18 +11,12 @@
 
 namespace Polymorphine\User\Cookies;
 
-use Iterator;
 
-
-class CookieJar implements Iterator
+class CookieJar
 {
     private $cookies;
     private $modified = [];
-    private $pointer  = 0;
 
-    /**
-     * @param Cookie[] $cookies
-     */
     public function __construct(array $cookies)
     {
         $this->cookies = $cookies;
@@ -32,15 +26,15 @@ class CookieJar implements Iterator
     {
         $name = $cookie->name();
 
-        $this->cookies[$name] = $cookie;
-        $this->modified[]     = $name;
+        $this->cookies[$name] = $cookie->value();
+        $this->modified[]     = $cookie;
     }
 
-    public function getValue($key, $default = null)
+    public function get($key, $default = null)
     {
         if (!$this->exists($key)) { return $default; }
 
-        return $this->cookies[$key]->value();
+        return $this->cookies[$key];
     }
 
     public function exists($key)
@@ -60,30 +54,8 @@ class CookieJar implements Iterator
         $this->set(new Cookie($key, $value, 2628000));
     }
 
-    public function current()
+    public function responseCookies()
     {
-        $name = $this->modified[$this->pointer];
-
-        return $this->cookies[$name];
-    }
-
-    public function next()
-    {
-        return $this->pointer++;
-    }
-
-    public function key()
-    {
-        return $this->pointer;
-    }
-
-    public function valid()
-    {
-        return isset($this->modified[$this->pointer]);
-    }
-
-    public function rewind()
-    {
-        $this->pointer = 0;
+        return $this->modified;
     }
 }
