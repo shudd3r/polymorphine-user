@@ -30,6 +30,6 @@ class AddResponseCookies implements MiddlewareInterface
     {
         $response = $handler->handle($request);
 
-        return $this->cookies->setCookies($response);
+        return $this->cookies->setHeaders($response);
     }
 }

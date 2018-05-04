@@ -28,7 +28,7 @@ class ResponseCookies
         $this->headers[] = $cookieHeader;
     }
 
-    public function setCookies(ResponseInterface $response): ResponseInterface
+    public function setHeaders(ResponseInterface $response): ResponseInterface
     {
         foreach ($this->headers as $cookie) {
             $response = $response->withAddedHeader('Set-Cookie', $cookie);
