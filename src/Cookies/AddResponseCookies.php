@@ -17,37 +17,19 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 
-class CookieExchange implements MiddlewareInterface
+class AddResponseCookies implements MiddlewareInterface
 {
     private $cookies;
 
-    public function __construct(CookieSetup $cookies)
+    public function __construct(ResponseCookies $cookies)
     {
         $this->cookies = $cookies;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $this->readCookies($request);
-
         $response = $handler->handle($request);
 
-        return $this->writeCookies($response);
-    }
-
-    protected function readCookies(ServerRequestInterface $request): void
-    {
-        $this->cookies->build($request->getCookieParams());
-    }
-
-    protected function writeCookies(ResponseInterface $response): ResponseInterface
-    {
-        $cookieJar = $this->cookies->collection();
-
-        foreach ($cookieJar->responseCookies() as $cookie) {
-            $response = $response->withAddedHeader('Set-Cookie', (string) $cookie);
-        }
-
-        return $response;
+        return $this->cookies->setCookies($response);
     }
 }

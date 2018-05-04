@@ -11,18 +11,108 @@
 
 namespace Polymorphine\User\Cookies;
 
+use DateTime;
+
 
 class CookieSetup
 {
-    private $cookieJar;
+    private const MAX_TIME = 2628000;
 
-    public function build(array $cookies)
+    protected $minutes;
+    protected $domain;
+    protected $path     = '/';
+    protected $secure   = false;
+    protected $httpOnly = false;
+
+    private $headers;
+    private $name;
+    private $value;
+
+    public function __construct(string $name, ResponseCookies $headers)
     {
-        $this->cookieJar = new CookieJar($cookies);
+        $this->name    = $name;
+        $this->headers = $headers;
     }
 
-    public function collection(): CookieJar
+    public function value(string $value): void
     {
-        return $this->cookieJar ?? $this->cookieJar = new CookieJar([]);
+        $this->value = $value;
+
+        $this->headers->addHeader($this->header());
+    }
+
+    public function remove(): void
+    {
+        $this->value   = null;
+        $this->minutes = -self::MAX_TIME;
+
+        $this->headers->addHeader($this->header());
+    }
+
+    public function expires(int $minutes): CookieSetup
+    {
+        $this->minutes = $minutes;
+        return $this;
+    }
+
+    public function permanent(): CookieSetup
+    {
+        $this->minutes = self::MAX_TIME;
+        return $this;
+    }
+
+    public function domain(string $domain): CookieSetup
+    {
+        $this->domain = $domain;
+        return $this;
+    }
+
+    public function path(string $path): CookieSetup
+    {
+        $this->path = $path;
+        return $this;
+    }
+
+    public function httpOnly(bool $value = true): CookieSetup
+    {
+        $this->httpOnly = $value;
+        return $this;
+    }
+
+    public function secure(bool $value = true): CookieSetup
+    {
+        $this->secure = $value;
+        return $this;
+    }
+
+    private function header(): string
+    {
+        $header = $this->name . '=' . $this->value;
+
+        if ($this->domain) {
+            $header .= '; Domain=' . (string) $this->domain;
+        }
+
+        if ($this->path !== '/') {
+            $header .= '; Path=' . $this->path;
+        }
+
+        if ($this->minutes) {
+            $seconds = $this->minutes * 60;
+            $expire  = (new DateTime())->setTimestamp(time() + $seconds)->format(DateTime::COOKIE);
+
+            $header .= '; Expires=' . $expire;
+            $header .= '; MaxAge=' . $seconds;
+        }
+
+        if ($this->secure) {
+            $header .= '; Secure';
+        }
+
+        if ($this->httpOnly) {
+            $header .= '; HttpOnly';
+        }
+
+        return $header;
     }
 }

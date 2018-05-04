@@ -12,8 +12,8 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
+use Polymorphine\User\Cookies\ResponseCookies;
 use Polymorphine\User\Repository;
-use Polymorphine\User\Cookies\CookieJar;
 use Polymorphine\User\UserEntity;
 
 
@@ -23,23 +23,27 @@ class CookieAuthentication implements Authentication
 
     private $cookies;
     private $repository;
+    private $token;
 
-    public function __construct(CookieJar $cookies, Repository $repository)
+    public function __construct(ResponseCookies $cookies, Repository $repository)
     {
         $this->cookies    = $cookies;
         $this->repository = $repository;
     }
 
+    public function credentials(array $credentials): void
+    {
+        $this->token = $credentials[self::REMEMBER_COOKIE] ?? null;
+    }
+
     public function user(): UserEntity
     {
-        $cookieToken = $this->cookies->get(self::REMEMBER_COOKIE);
-
-        $user = ($cookieToken)
-            ? $this->repository->getUserByCookieToken($cookieToken)
+        $user = ($this->token)
+            ? $this->repository->getUserByCookieToken($this->token)
             : $this->repository->guestUser();
 
-        if (!$user->isLoggedIn()) {
-            $this->cookies->clear(self::REMEMBER_COOKIE);
+        if (!$user->isLoggedIn() && $this->token) {
+            $this->cookies->cookie(self::REMEMBER_COOKIE)->remove();
         }
 
         return $user;
