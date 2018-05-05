@@ -23,7 +23,7 @@ class ResponseCookies
         return new CookieSetup($name, $this);
     }
 
-    public function addHeader(string $cookieHeader)
+    public function addHeader(string $cookieHeader): void
     {
         $this->headers[] = $cookieHeader;
     }
