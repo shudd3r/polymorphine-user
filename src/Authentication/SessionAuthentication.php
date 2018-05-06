@@ -36,7 +36,7 @@ class SessionAuthentication implements Authentication
     {
         $userId = $this->session->get($this->session::USER_ID_KEY);
         if (!$userId) {
-            return $this->repository->guestUser();
+            return $this->repository->anonymousUser();
         }
 
         $user = $this->repository->getUserById($userId);

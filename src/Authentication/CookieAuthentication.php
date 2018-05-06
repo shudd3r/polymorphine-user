@@ -41,7 +41,7 @@ class CookieAuthentication implements Authentication
 
     public function user(): UserEntity
     {
-        if (!$this->token) { return $this->repository->guestUser(); }
+        if (!$this->token) { return $this->repository->anonymousUser(); }
 
         $user = $this->repository->getUserByCookieToken($this->token);
 

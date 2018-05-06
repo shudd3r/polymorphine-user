@@ -16,5 +16,5 @@ interface Repository
 {
     public function getUserById(string $id): UserEntity;
     public function getUserByCookieToken(string $id): UserEntity;
-    public function guestUser(): UserEntity;
+    public function anonymousUser(): UserEntity;
 }

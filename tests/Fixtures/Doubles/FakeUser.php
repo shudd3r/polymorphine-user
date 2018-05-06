@@ -11,10 +11,10 @@
 
 namespace Polymorphine\User\Tests\Fixtures\Doubles;
 
-use Polymorphine\User\Entity\GuestUser;
+use Polymorphine\User\Entity\AnonymousUser;
 
 
-class FakeUser extends GuestUser
+class FakeUser extends AnonymousUser
 {
     private $id;
 

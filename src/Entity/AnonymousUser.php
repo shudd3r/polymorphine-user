@@ -14,7 +14,7 @@ namespace Polymorphine\User\Entity;
 use Polymorphine\User\UserEntity;
 
 
-class GuestUser implements UserEntity
+class AnonymousUser implements UserEntity
 {
     public function id(): string
     {
