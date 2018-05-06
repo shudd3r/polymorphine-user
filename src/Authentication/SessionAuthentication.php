@@ -12,8 +12,8 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
+use Polymorphine\User\Session\SessionDataStorage;
 use Polymorphine\User\Repository;
-use Polymorphine\User\Session;
 use Polymorphine\User\UserEntity;
 
 
@@ -22,10 +22,14 @@ class SessionAuthentication implements Authentication
     private $session;
     private $repository;
 
-    public function __construct(Session $session, Repository $repository)
+    public function __construct(SessionDataStorage $session, Repository $repository)
     {
         $this->session    = $session;
         $this->repository = $repository;
+    }
+
+    public function credentials(array $credentials): void
+    {
     }
 
     public function user(): UserEntity

@@ -14,13 +14,13 @@ namespace Polymorphine\User\Session;
 
 class SessionDataStorage
 {
+    public const USER_ID_KEY = 'id';
+
     private $sessionData;
 
     public function get(string $key, $default = null)
     {
-        if (!$this->exists($key)) { return $default; }
-
-        return $this->sessionData[$key];
+        return $this->exists($key) ? $this->sessionData[$key] : $default;
     }
 
     public function set(string $key, $value = null): void
