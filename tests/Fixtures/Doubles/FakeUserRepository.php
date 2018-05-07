@@ -11,13 +11,12 @@
 
 namespace Polymorphine\User\Tests\Fixtures\Doubles;
 
-
 use Polymorphine\User\Entity\AnonymousUser;
 use Polymorphine\User\Repository;
-use Polymorphine\User\UserEntity;
+use Polymorphine\User\AuthenticatedUser;
 
 
-class FakeRepository implements Repository
+class FakeUserRepository implements Repository
 {
     private $id;
 
@@ -25,17 +24,23 @@ class FakeRepository implements Repository
     {
         $this->id = $id;
     }
-    public function getUserById(string $id): UserEntity
+
+    public function getUserById(string $id): AuthenticatedUser
     {
         return $this->id === $id ? new FakeUser($id) : $this->anonymousUser();
     }
 
-    public function getUserByCookieToken(string $id): UserEntity
+    public function getUserByLoginForm(string $login, string $password, bool $remember): AuthenticatedUser
     {
-        return $this->id === $id ? new FakeUser($id) : $this->anonymousUser();
+        return $this->id === $login ? new FakeUser($login) : $this->anonymousUser();
     }
 
-    public function anonymousUser(): UserEntity
+    public function getUserByCookieToken(string $token): AuthenticatedUser
+    {
+        return $this->id === $token ? new FakeUser($token) : $this->anonymousUser();
+    }
+
+    public function anonymousUser(): AuthenticatedUser
     {
         return new AnonymousUser();
     }

@@ -12,7 +12,7 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
-use Polymorphine\User\UserEntity;
+use Polymorphine\User\AuthenticatedUser;
 
 
 class CompositeAuthentication implements Authentication
@@ -31,7 +31,7 @@ class CompositeAuthentication implements Authentication
         $this->credentials = $credentials;
     }
 
-    public function user(): UserEntity
+    public function user(): AuthenticatedUser
     {
         if ($this->user) { return $this->user; }
 

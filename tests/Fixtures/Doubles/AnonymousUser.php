@@ -11,23 +11,18 @@
 
 namespace Polymorphine\User\Tests\Fixtures\Doubles;
 
+use Polymorphine\User\AuthenticatedUser;
 
-class FakeUser extends AnonymousUser
+
+class AnonymousUser implements AuthenticatedUser
 {
-    private $id;
-
-    public function __construct(string $id)
-    {
-        $this->id = $id;
-    }
-
     public function id(): string
     {
-        return $this->id;
+        return '';
     }
 
-    public function isLoggedIn()
+    public function isLoggedIn(): bool
     {
-        return true;
+        return false;
     }
 }

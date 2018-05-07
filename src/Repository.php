@@ -14,7 +14,7 @@ namespace Polymorphine\User;
 
 interface Repository
 {
-    public function getUserById(string $id): UserEntity;
-    public function getUserByCookieToken(string $id): UserEntity;
-    public function anonymousUser(): UserEntity;
+    public function getUserById(string $id): AuthenticatedUser;
+    public function getUserByCookieToken(string $token): AuthenticatedUser;
+    public function anonymousUser(): AuthenticatedUser;
 }

@@ -13,9 +13,9 @@ namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
 use Polymorphine\User\Cookies\ResponseCookies;
-use Polymorphine\User\Session\SessionDataStorage;
+use Polymorphine\User\Session\SessionStorage;
 use Polymorphine\User\Repository;
-use Polymorphine\User\UserEntity;
+use Polymorphine\User\AuthenticatedUser;
 
 
 class CookieAuthentication implements Authentication
@@ -27,7 +27,7 @@ class CookieAuthentication implements Authentication
     private $repository;
     private $token;
 
-    public function __construct(ResponseCookies $cookies, SessionDataStorage $session, Repository $repository)
+    public function __construct(ResponseCookies $cookies, SessionStorage $session, Repository $repository)
     {
         $this->cookies    = $cookies;
         $this->session    = $session;
@@ -39,7 +39,7 @@ class CookieAuthentication implements Authentication
         $this->token = $credentials[self::REMEMBER_COOKIE] ?? null;
     }
 
-    public function user(): UserEntity
+    public function user(): AuthenticatedUser
     {
         if (!$this->token) { return $this->repository->anonymousUser(); }
 

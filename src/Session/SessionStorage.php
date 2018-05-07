@@ -12,7 +12,7 @@
 namespace Polymorphine\User\Session;
 
 
-class SessionDataStorage
+class SessionStorage
 {
     public const USER_ID_KEY = 'id';
 

@@ -26,7 +26,7 @@ class StartSessionContext implements MiddlewareInterface
 
     private $sessionContext = false;
 
-    public function __construct(ResponseCookies $cookies, SessionDataStorage $session = null)
+    public function __construct(ResponseCookies $cookies, SessionStorage $session = null)
     {
         $this->session = $session;
         $this->cookies = $cookies;

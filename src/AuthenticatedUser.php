@@ -12,17 +12,9 @@
 namespace Polymorphine\User;
 
 
-interface UserEntity
+interface AuthenticatedUser
 {
     public function id(): string;
 
     public function isLoggedIn(): bool;
-
-    public function hasRole($role): bool;
-
-    public function isAllowed($action): bool;
-
-    public function profile($key = null);
-
-    public function settings($key = null);
 }
