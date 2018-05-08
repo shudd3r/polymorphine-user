@@ -13,38 +13,27 @@ namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
 use Polymorphine\User\Session\SessionStorage;
-use Polymorphine\User\Repository;
-use Polymorphine\User\AuthenticatedUser;
 
 
 class SessionAuthentication implements Authentication
 {
     private $session;
-    private $repository;
+    private $identities;
 
-    public function __construct(SessionStorage $session, Repository $repository)
+    public function __construct(SessionStorage $session, Identification $identities)
     {
         $this->session    = $session;
-        $this->repository = $repository;
+        $this->identities = $identities;
     }
 
-    public function credentials(array $credentials): void
+    public function authenticate(array $credentials): ?int
     {
-    }
+        if (!$id = $this->session->get($this->session::USER_ID_KEY)) { return null; };
 
-    public function user(): AuthenticatedUser
-    {
-        $userId = $this->session->get($this->session::USER_ID_KEY);
-        if (!$userId) {
-            return $this->repository->anonymousUser();
-        }
-
-        $user = $this->repository->getUserById($userId);
-
-        if (!$user->isLoggedIn()) {
+        if (!$this->identities->confirmId($id)) {
             $this->session->clear($this->session::USER_ID_KEY);
         }
 
-        return $user;
+        return $id ?? null;
     }
 }

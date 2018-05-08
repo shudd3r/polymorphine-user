@@ -12,35 +12,23 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
-use Polymorphine\User\AuthenticatedUser;
 
 
 class CompositeAuthentication implements Authentication
 {
     private $authMethods;
-    private $credentials;
-    private $user;
 
     public function __construct(Authentication ...$authentications)
     {
         $this->authMethods = $authentications;
     }
 
-    public function credentials(array $credentials): void
+    public function authenticate(array $credentials): ?int
     {
-        $this->credentials = $credentials;
-    }
-
-    public function user(): AuthenticatedUser
-    {
-        if ($this->user) { return $this->user; }
-
         foreach ($this->authMethods as $auth) {
-            $auth->credentials($this->credentials);
-            $this->user = $auth->user();
-            if ($this->user->isLoggedIn()) { break; }
+            if ($id  = $auth->authenticate($credentials)) { break; }
         }
 
-        return $this->user;
+        return $id ?? null;
     }
 }

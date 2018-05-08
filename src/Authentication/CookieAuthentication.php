@@ -14,8 +14,6 @@ namespace Polymorphine\User\Authentication;
 use Polymorphine\User\Authentication;
 use Polymorphine\User\Cookies\ResponseCookies;
 use Polymorphine\User\Session\SessionStorage;
-use Polymorphine\User\Repository;
-use Polymorphine\User\AuthenticatedUser;
 
 
 class CookieAuthentication implements Authentication
@@ -24,31 +22,25 @@ class CookieAuthentication implements Authentication
 
     private $cookies;
     private $session;
-    private $repository;
-    private $token;
+    private $identities;
 
-    public function __construct(ResponseCookies $cookies, SessionStorage $session, Repository $repository)
+    public function __construct(ResponseCookies $cookies, SessionStorage $session, Identification $identities)
     {
         $this->cookies    = $cookies;
         $this->session    = $session;
-        $this->repository = $repository;
+        $this->identities = $identities;
     }
 
-    public function credentials(array $credentials): void
+    public function authenticate(array $credentials): ?int
     {
-        $this->token = $credentials[self::REMEMBER_COOKIE] ?? null;
-    }
+        $token = $credentials[self::REMEMBER_COOKIE] ?? null;
 
-    public function user(): AuthenticatedUser
-    {
-        if (!$this->token) { return $this->repository->anonymousUser(); }
+        if (!$token) { return null; }
 
-        $user = $this->repository->getUserByCookieToken($this->token);
-
-        $user->isLoggedIn()
-            ? $this->session->set($this->session::USER_ID_KEY, $user->id())
+        ($id = $this->identities->getIdByCookieToken($token))
+            ? $this->session->set($this->session::USER_ID_KEY, $id)
             : $this->cookies->cookie(self::REMEMBER_COOKIE)->remove();
 
-        return $user;
+        return $id ?? null;
     }
 }

@@ -14,6 +14,5 @@ namespace Polymorphine\User;
 
 interface Authentication
 {
-    public function credentials(array $credentials): void;
-    public function user(): AuthenticatedUser;
+    public function authenticate(array $credentials): ?int;
 }
