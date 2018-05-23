@@ -11,34 +11,42 @@
 
 namespace Polymorphine\User\Authentication;
 
+use Polymorphine\User\Repository;
+use Polymorphine\User\UserData;
+
 
 class Identification
 {
-    public $database;
+    protected const TOKEN_SEPARATOR = ':';
+
+    public $repository;
     public $factory;
 
-    public function __construct($database, $factory)
+    public function __construct(Repository $repository, $factory)
     {
-        $this->database = $database;
-        $this->factory  = $factory;
+        $this->repository = $repository;
+        $this->factory    = $factory;
     }
 
     public function confirmId(string $id): bool
     {
-        $data = $this->database->findWhere(['id' => $id]);
-        return !empty($data);
+        $user = new UserData(['id' => $id]);
+        $user = $this->repository->match($user);
+
+        return isset($user);
     }
 
     public function getIdByCookieToken(string $token): ?string
     {
-        [$key, $hash] = explode(':', $token);
+        [$key, $hash] = explode(self::TOKEN_SEPARATOR, $token);
 
-        $data = $this->database->findWhere(['tokenKey' => $key]);
+        $user = new UserData(['tokenKey' => $key]);
+        $user = $this->repository->match($user);
 
-        if (!$data || $data['tokenHash']) {
-            //TODO: Hash check
-        }
+        if (!isset($user) || !$user->tokenHash) { return null; }
 
-        return $data['id'] ?? null;
+        //TODO: Hash check
+
+        return $user->id ?? null;
     }
 }
