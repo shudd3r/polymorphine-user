@@ -12,21 +12,21 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
-use Polymorphine\User\Cookies\ResponseCookies;
-use Polymorphine\User\Session\SessionStorage;
+use Polymorphine\Http\Server\Response\ResponseHeaders;
+use Polymorphine\Http\Server\Session\SessionStorage;
 
 
 class CookieAuthentication implements Authentication
 {
     protected const REMEMBER_COOKIE = 'remember';
 
-    private $cookies;
+    private $headers;
     private $session;
     private $identities;
 
-    public function __construct(ResponseCookies $cookies, SessionStorage $session, Identification $identities)
+    public function __construct(ResponseHeaders $headers, SessionStorage $session, Identification $identities)
     {
-        $this->cookies    = $cookies;
+        $this->headers    = $headers;
         $this->session    = $session;
         $this->identities = $identities;
     }
@@ -38,8 +38,8 @@ class CookieAuthentication implements Authentication
         if (!$token) { return null; }
 
         ($id = $this->identities->getIdByCookieToken($token))
-            ? $this->session->set($this->session::USER_ID_KEY, $id)
-            : $this->cookies->cookie(self::REMEMBER_COOKIE)->remove();
+            ? $this->session->set(SessionAuthentication::USER_ID_KEY, $id)
+            : $this->headers->cookie(self::REMEMBER_COOKIE)->remove();
 
         return $id ?? null;
     }

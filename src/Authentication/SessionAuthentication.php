@@ -12,11 +12,13 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
-use Polymorphine\User\Session\SessionStorage;
+use Polymorphine\Http\Server\Session\SessionStorage;
 
 
 class SessionAuthentication implements Authentication
 {
+    public const USER_ID_KEY = 'id';
+
     private $session;
     private $identities;
 
@@ -28,10 +30,10 @@ class SessionAuthentication implements Authentication
 
     public function authenticate(array $credentials): ?int
     {
-        if (!$id = $this->session->get($this->session::USER_ID_KEY)) { return null; };
+        if (!$id = $this->session->get(static::USER_ID_KEY)) { return null; };
 
         if (!$this->identities->confirmId($id)) {
-            $this->session->clear($this->session::USER_ID_KEY);
+            $this->session->clear();
         }
 
         return $id ?? null;
