@@ -17,17 +17,45 @@ class UserData
     public $id;
     public $name;
     public $email;
-    public $passwordHash;
     public $tokenKey;
-    public $tokenHash;
+
+    private $password;
+    private $passwordHash;
+
+    private $token;
+    private $tokenHash;
 
     public function __construct(array $data = [])
     {
-        $this->id           = $data['id'] ?? null;
-        $this->name         = $data['username'] ?? null;
-        $this->email        = $data['email'] ?? null;
+        $this->id       = $data['id'] ?? null;
+        $this->name     = $data['name'] ?? null;
+        $this->email    = $data['email'] ?? null;
+        $this->tokenKey = $data['tokenKey'] ?? null;
+
+        $this->password     = $data['password'] ?? null;
         $this->passwordHash = $data['passwordHash'] ?? null;
-        $this->tokenKey     = $data['tokenKey'] ?? null;
-        $this->tokenHash    = $data['tokenHash'] ?? null;
+
+        $this->token     = $data['token'] ?? null;
+        $this->tokenHash = $data['tokenHash'] ?? null;
+    }
+
+    public function passwordMatch(UserData $user): bool
+    {
+        return $user->verifyPassword($this->password);
+    }
+
+    public function verifyPassword(string $password): bool
+    {
+        return password_verify($password, $this->passwordHash);
+    }
+
+    public function tokenMatch(UserData $user): bool
+    {
+        return $user->verifyToken($this->token);
+    }
+
+    public function verifyToken(string $token): bool
+    {
+        return hash('sha256', $token) === $this->tokenHash;
     }
 }

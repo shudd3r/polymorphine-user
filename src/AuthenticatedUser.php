@@ -14,7 +14,7 @@ namespace Polymorphine\User;
 
 interface AuthenticatedUser
 {
-    public function id(): string;
+    public function id(): int;
 
     public function isLoggedIn(): bool;
 }

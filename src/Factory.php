@@ -15,4 +15,6 @@ namespace Polymorphine\User;
 interface Factory
 {
     public function create(UserData $user): AuthenticatedUser;
+
+    public function anonymous(): AuthenticatedUser;
 }

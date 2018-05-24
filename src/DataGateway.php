@@ -12,7 +12,7 @@
 namespace Polymorphine\User;
 
 
-interface Repository
+interface DataGateway
 {
-    public function match(UserData $user): ?UserData;
+    public function match(UserData $user): UserData;
 }
