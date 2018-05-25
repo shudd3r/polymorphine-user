@@ -19,11 +19,23 @@ class Data
     public $email;
     public $tokenKey;
 
+    public $data;
+
     public function __construct(array $data = [])
     {
-        $this->id       = $data['id'] ?? null;
-        $this->name     = $data['name'] ?? null;
-        $this->email    = $data['email'] ?? null;
-        $this->tokenKey = $data['tokenKey'] ?? null;
+        $this->data = $data;
+
+        $this->id       = (int) $this->pullFromData('id');
+        $this->name     = (string) $this->pullFromData('name');
+        $this->email    = (string) $this->pullFromData('email');
+        $this->tokenKey = (string) $this->pullFromData('tokenKey');
+    }
+
+    protected function pullFromData(string $key): array
+    {
+        $value = $this->data[$key] ?? null;
+        unset($this->data[$key]);
+
+        return $value;
     }
 }

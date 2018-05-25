@@ -21,10 +21,10 @@ class Credentials extends Data
 
     public function __construct(array $data)
     {
-        $this->password = (string) $data['password'] ?? null;
-        $this->token    = (string) $data['token'] ?? null;
-
         parent::__construct($data);
+
+        $this->password = (string) $this->pullFromData('password');
+        $this->token    = (string) $this->pullFromData('token');
     }
 
     public function match(DbRecord $dbUser): bool

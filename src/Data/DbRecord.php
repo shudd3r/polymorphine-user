@@ -21,10 +21,10 @@ class DbRecord extends Data
 
     public function __construct(array $data)
     {
-        $this->password = (string) $data['password'] ?? null;
-        $this->token    = (string) $data['token'] ?? null;
-
         parent::__construct($data);
+
+        $this->password = (string) $this->pullFromData('password');
+        $this->token    = (string) $this->pullFromData('token');
     }
 
     public function verifyPassword(string $password): bool
@@ -34,6 +34,7 @@ class DbRecord extends Data
 
     public function verifyToken(string $token): bool
     {
+        //TODO: clear token hash in db when doesn't match (tokenKey was guessed)
         return hash_equals($this->token, hash('sha256', $token));
     }
 }

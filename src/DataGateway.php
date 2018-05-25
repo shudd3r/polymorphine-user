@@ -16,5 +16,5 @@ use Polymorphine\User\Data\DbRecord;
 
 interface DataGateway
 {
-    public function match(Data $user): DbRecord;
+    public function match(Data $user): ?DbRecord;
 }
