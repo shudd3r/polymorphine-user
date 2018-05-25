@@ -31,11 +31,11 @@ class SessionAuthentication extends AuthMiddleware
 
     protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
-        if (!$id = $this->session->get(Authentication::SESSION_USER_KEY)) {
-            return $request;
-        }
+        $id = $this->session->get(Authentication::SESSION_USER_KEY);
+        if (!$id) { return $request; }
 
-        if (!$this->auth->authenticate(new Credentials(['id' => $id]))) {
+        $user = $this->auth->signIn(new Credentials(['id' => $id]));
+        if (!$user->isLoggedIn()) {
             $this->session->clear();
             return $request;
         }

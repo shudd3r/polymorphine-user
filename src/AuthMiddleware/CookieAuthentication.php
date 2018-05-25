@@ -38,22 +38,27 @@ class CookieAuthentication extends AuthMiddleware
     {
         $cookies = $request->getCookieParams();
         $token   = $cookies[Authentication::REMEMBER_COOKIE] ?? null;
-
         if (!$token) { return $request; }
 
-        [$key, $hash] = explode(static::TOKEN_SEPARATOR, $token);
-
-        $credentials = new Credentials([
-            'tokenKey' => $key,
-            'token'    => $hash
-        ]);
-
-        if (!$id = $this->auth->authenticate($credentials)) {
+        $user = $this->auth->signIn($this->credentials($token));
+        if (!$user->isLoggedIn()) {
             $this->headers->cookie(Authentication::REMEMBER_COOKIE)->remove();
             return $request;
         }
 
+        $id = $user->id();
         $this->session->set(Authentication::SESSION_USER_KEY, $id);
+
         return $request->withAttribute(static::USER_ATTR, $id);
+    }
+
+    protected function credentials(string $cookieToken): Credentials
+    {
+        [$key, $hash] = explode(static::TOKEN_SEPARATOR, $cookieToken);
+
+        return new Credentials([
+            'tokenKey' => $key,
+            'token'    => $hash
+        ]);
     }
 }
