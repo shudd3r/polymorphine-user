@@ -15,7 +15,7 @@ use Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\Authentication;
 use Polymorphine\Http\Server\Session\SessionStorage;
 use Psr\Http\Message\ServerRequestInterface;
-use Polymorphine\User\UserData;
+use Polymorphine\User\Data\Credentials;
 
 
 class SessionAuthentication extends AuthMiddleware
@@ -35,7 +35,7 @@ class SessionAuthentication extends AuthMiddleware
             return $request;
         }
 
-        if (!$this->auth->authenticate(new UserData(['id' => $id]))) {
+        if (!$this->auth->authenticate(new Credentials(['id' => $id]))) {
             $this->session->clear();
             return $request;
         }

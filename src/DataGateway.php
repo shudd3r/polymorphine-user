@@ -11,8 +11,10 @@
 
 namespace Polymorphine\User;
 
+use Polymorphine\User\Data\DbRecord;
+
 
 interface DataGateway
 {
-    public function match(UserData $user): UserData;
+    public function match(Data $user): DbRecord;
 }

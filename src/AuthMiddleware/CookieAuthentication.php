@@ -16,7 +16,7 @@ use Polymorphine\User\Authentication;
 use Polymorphine\Http\Server\Response\ResponseHeaders;
 use Polymorphine\Http\Server\Session\SessionStorage;
 use Psr\Http\Message\ServerRequestInterface;
-use Polymorphine\User\UserData;
+use Polymorphine\User\Data\Credentials;
 
 
 class CookieAuthentication extends AuthMiddleware
@@ -43,12 +43,12 @@ class CookieAuthentication extends AuthMiddleware
 
         [$key, $hash] = explode(static::TOKEN_SEPARATOR, $token);
 
-        $user = new UserData([
+        $credentials = new Credentials([
             'tokenKey' => $key,
             'token'    => $hash
         ]);
 
-        if (!$id = $this->auth->authenticate($user)) {
+        if (!$id = $this->auth->authenticate($credentials)) {
             $this->headers->cookie(Authentication::REMEMBER_COOKIE)->remove();
             return $request;
         }

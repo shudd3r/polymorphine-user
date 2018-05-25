@@ -11,6 +11,9 @@
 
 namespace Polymorphine\User;
 
+use Polymorphine\User\Data\Credentials;
+use Polymorphine\User\Data\DbRecord;
+
 
 class Authentication
 {
@@ -29,24 +32,16 @@ class Authentication
         $this->factory  = $factory;
     }
 
-    public function authenticate(UserData $user): ?int
+    public function authenticate(Credentials $credentials): ?int
     {
         if ($this->user) { return $this->user->id(); }
 
-        if ($user->id) {
-            $dbUser = $this->database->match($user);
-            return $dbUser ? $this->createUser($dbUser) : null;
-        }
+        $dbUser = $this->database->match($credentials);
+        if (!$dbUser) { return null; }
 
-        if ($user->tokenKey) {
-            return $this->authenticateWithToken($user);
-        }
-
-        if ($user->name || $user->email) {
-            return $this->authenticateWithPassword($user);
-        }
-
-        return null;
+        return $credentials->id
+            ? $this->createUser($dbUser)
+            : $this->verified($dbUser, $credentials);
     }
 
     public function user(): AuthenticatedUser
@@ -54,21 +49,16 @@ class Authentication
         return $this->user ?? $this->user = $this->factory->anonymous();
     }
 
-    protected function createUser(UserData $user): int
+    protected function createUser(Data $user): int
     {
         $this->user = $this->factory->create($user);
         return $user->id;
     }
 
-    private function authenticateWithPassword(UserData $user): ?int
+    private function verified(DbRecord $user, Credentials $credentials): ?int
     {
-        $dbUser = $this->database->match($user);
-        return ($dbUser && $user->passwordMatch($dbUser)) ? $this->createUser($dbUser) : null;
-    }
-
-    private function authenticateWithToken(UserData $user): ?int
-    {
-        $dbUser = $this->database->match($user);
-        return ($dbUser && $user->tokenMatch($dbUser)) ? $this->createUser($dbUser) : null;
+        return $credentials->match($user)
+            ? $this->createUser($user)
+            : null;
     }
 }
