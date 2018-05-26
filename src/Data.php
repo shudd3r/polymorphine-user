@@ -31,7 +31,7 @@ class Data
         $this->tokenKey = (string) $this->pullFromData('tokenKey');
     }
 
-    protected function pullFromData(string $key): array
+    protected function pullFromData(string $key)
     {
         $value = $this->data[$key] ?? null;
         unset($this->data[$key]);
