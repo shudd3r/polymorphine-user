@@ -2,12 +2,13 @@
     "name": "polymorphine/user",
     "description": "User authentication module",
     "type": "library",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
-        "php": "^7.1"
+        "php": "^7.1",
+        "polymorphine/http": "@dev"
     },
     "require-dev": {
-        "polymorphine/http": "@dev",
         "polymorphine/cs": "^1.1",
         "phpunit/phpunit": "^7.0"
     },

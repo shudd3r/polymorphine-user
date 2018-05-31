@@ -13,8 +13,8 @@ namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\Authentication;
-use Polymorphine\Http\Server\Response\ResponseHeaders;
-use Polymorphine\Http\Server\Session\SessionStorage;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Polymorphine\Http\Context\Session\SessionStorage;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\User\Data\Credentials;
 
