@@ -14,7 +14,7 @@ namespace Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\Authentication;
 use Polymorphine\Http\Context\Response\ResponseHeaders;
-use Polymorphine\Http\Context\Session\SessionStorage;
+use Polymorphine\Http\Context\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\User\Data\Credentials;
 
@@ -27,7 +27,7 @@ class CookieAuthentication extends AuthMiddleware
     private $session;
     private $auth;
 
-    public function __construct(ResponseHeaders $headers, SessionStorage $session, Authentication $auth)
+    public function __construct(ResponseHeaders $headers, Session $session, Authentication $auth)
     {
         $this->headers = $headers;
         $this->session = $session;

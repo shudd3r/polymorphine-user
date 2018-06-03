@@ -13,7 +13,7 @@ namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\Authentication;
-use Polymorphine\Http\Context\Session\SessionStorage;
+use Polymorphine\Http\Context\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\User\Data\Credentials;
 
@@ -23,7 +23,7 @@ class SessionAuthentication extends AuthMiddleware
     private $session;
     private $auth;
 
-    public function __construct(SessionStorage $session, Authentication $auth)
+    public function __construct(Session $session, Authentication $auth)
     {
         $this->session = $session;
         $this->auth    = $auth;
