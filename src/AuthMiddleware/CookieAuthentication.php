@@ -21,8 +21,6 @@ use Polymorphine\User\Data\Credentials;
 
 class CookieAuthentication extends AuthMiddleware
 {
-    protected const TOKEN_SEPARATOR = ':';
-
     private $headers;
     private $session;
     private $auth;
@@ -37,24 +35,27 @@ class CookieAuthentication extends AuthMiddleware
     public function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
         $cookies = $request->getCookieParams();
-        $token   = $cookies[Authentication::REMEMBER_COOKIE] ?? null;
-        if (!$token) { return $request; }
+        if (!$credentials = $this->credentials($cookies)) { return $request; }
 
-        $user = $this->auth->signIn($this->credentials($token));
+        $user = $this->auth->signIn($credentials);
         if (!$user->isLoggedIn()) {
-            $this->headers->cookie(Authentication::REMEMBER_COOKIE)->remove();
+            $this->headers->cookie($this->auth::REMEMBER_COOKIE)->remove();
             return $request;
         }
 
         $id = $user->id();
-        $this->session->set(Authentication::SESSION_USER_KEY, $id);
+        $this->session->set($this->auth::SESSION_USER_KEY, $id);
 
         return $request->withAttribute(static::USER_ATTR, $id);
     }
 
-    protected function credentials(string $cookieToken): Credentials
+    protected function credentials(array $cookies): ?Credentials
     {
-        [$key, $hash] = explode(static::TOKEN_SEPARATOR, $cookieToken);
+        $token = $cookies[$this->auth::REMEMBER_COOKIE] ?? null;
+        if (!$token) { return null; }
+
+        [$key, $hash] = explode($this->auth::TOKEN_SEPARATOR, $token);
+        if (!$key || !$hash) { return null; }
 
         return new Credentials([
             'tokenKey' => $key,

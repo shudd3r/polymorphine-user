@@ -32,7 +32,18 @@ class Credentials extends Data
         if (!$this->password && !$this->token) { return false; }
 
         return $this->password
-            ? $dbUser->verifyPassword($this->password)
+            ? $this->verifyPassword($dbUser)
             : $dbUser->verifyToken($this->token);
+    }
+
+    private function verifyPassword(DbRecord $dbUser): bool
+    {
+        $isValid = $dbUser->verifyPassword($this->password);
+        if (!$isValid) { return false; }
+
+        if ($this->tokenKey && $this->token) {
+            $dbUser->resetToken($this->tokenKey, $this->token);
+        }
+        return true;
     }
 }

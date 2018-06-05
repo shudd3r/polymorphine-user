@@ -37,5 +37,9 @@ abstract class Repository
         return $this->factory->anonymous();
     }
 
+    abstract public function setToken(int $id, string $tokenKey, string $token);
+
+    abstract public function setPassword(int $id, string $password);
+
     abstract protected function record(Data $data): ?DbRecord;
 }

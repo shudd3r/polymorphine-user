@@ -18,6 +18,7 @@ class Authentication
 {
     public const SESSION_USER_KEY = 'userId';
     public const REMEMBER_COOKIE  = 'remember';
+    public const TOKEN_SEPARATOR  = ':';
 
     private $repository;
     private $user;

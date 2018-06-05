@@ -12,15 +12,19 @@
 namespace Polymorphine\User\Data;
 
 use Polymorphine\User\Data;
+use Polymorphine\User\Repository;
 
 
 class DbRecord extends Data
 {
+    private $repository;
     private $password;
     private $token;
 
-    public function __construct(array $data)
+    public function __construct(array $data, Repository $repository)
     {
+        $this->repository = $repository;
+
         parent::__construct($data);
 
         $this->password = (string) $this->pullFromData('password');
@@ -29,12 +33,28 @@ class DbRecord extends Data
 
     public function verifyPassword(string $password): bool
     {
-        return password_verify($password, $this->password);
+        if (!password_verify($password, $this->password)) { return false; }
+        if (password_needs_rehash($this->password, PASSWORD_DEFAULT)) {
+            $this->repository->setPassword($this->id, password_hash($password, PASSWORD_DEFAULT));
+        }
+        return true;
     }
 
     public function verifyToken(string $token): bool
     {
-        //TODO: clear token hash in db when doesn't match (tokenKey was guessed)
-        return hash_equals($this->token, hash('sha256', $token));
+        if (hash_equals($this->token, $this->hash($token))) { return true; }
+        $this->resetToken();
+        return false;
+    }
+
+    public function resetToken(string $tokenKey = null, string $token = null): void
+    {
+        $tokenHash = $token ? $this->hash($token) : '';
+        $this->repository->setToken($this->id, $tokenKey ?? '', $tokenHash);
+    }
+
+    private function hash(string $token): string
+    {
+        return hash('sha256', $token);
     }
 }
