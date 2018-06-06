@@ -19,12 +19,19 @@ class Credentials extends Data
     private $password;
     private $token;
 
+    private $newToken;
+
     public function __construct(array $data)
     {
         parent::__construct($data);
 
         $this->password = (string) $this->pullFromData('password');
         $this->token    = (string) $this->pullFromData('token');
+
+        if ($this->password && $this->token) {
+            $this->newToken = $this->tokenKey;
+            $this->tokenKey = null;
+        }
     }
 
     public function match(DbRecord $dbUser): bool
@@ -41,8 +48,8 @@ class Credentials extends Data
         $isValid = $dbUser->verifyPassword($this->password);
         if (!$isValid) { return false; }
 
-        if ($this->tokenKey && $this->token) {
-            $dbUser->resetToken($this->tokenKey, $this->token);
+        if ($this->newToken && $this->token) {
+            $dbUser->resetToken($this->newToken, $this->token);
         }
         return true;
     }
