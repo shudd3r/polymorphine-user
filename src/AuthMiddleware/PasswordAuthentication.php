@@ -42,16 +42,20 @@ class PasswordAuthentication extends AuthMiddleware
 
         $user = $this->auth->signIn($credentials);
         if (!$user->isLoggedIn()) {
-            $this->headers->cookie(Authentication::REMEMBER_COOKIE)->remove();
+            $this->headers->cookie($this->auth::REMEMBER_COOKIE)->remove();
             return $request;
         }
 
         if ($this->cookie) {
-            $this->headers->cookie($this->auth::REMEMBER_COOKIE)->httpOnly()->value($this->cookie);
+            $this->headers->cookie($this->auth::REMEMBER_COOKIE)
+                          ->httpOnly()
+                          ->permanent()
+                          ->value($this->cookie);
         }
 
         $id = $user->id();
-        $this->session->set(Authentication::SESSION_USER_KEY, $id);
+        //TODO: regenerate session ID
+        $this->session->set($this->auth::SESSION_USER_KEY, $id);
 
         return $request->withAttribute(static::USER_ATTR, $id);
     }
@@ -64,8 +68,8 @@ class PasswordAuthentication extends AuthMiddleware
         if (!$login || !$password) { return null; }
 
         if ($persistent) {
-            $tokenKey  = uniqid();
-            $tokenHash = bin2hex(random_bytes(32));
+            $tokenKey     = uniqid();
+            $tokenHash    = bin2hex(random_bytes(32));
             $this->cookie = $tokenKey . $this->auth::TOKEN_SEPARATOR . $tokenHash;
         }
 
