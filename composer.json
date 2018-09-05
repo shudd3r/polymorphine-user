@@ -9,7 +9,7 @@
         "polymorphine/http": "@dev"
     },
     "require-dev": {
-        "polymorphine/cs": "^1.1",
+        "polymorphine/cs": "@dev",
         "phpunit/phpunit": "^7.0"
     },
     "license": "MIT",

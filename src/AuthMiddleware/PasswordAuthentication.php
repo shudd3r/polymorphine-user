@@ -12,25 +12,28 @@
 namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
-use Polymorphine\Http\Context\Session;
 use Polymorphine\User\Authentication;
 use Polymorphine\User\Data\Credentials;
+use Polymorphine\Http\Context\SessionManager;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
 use Psr\Http\Message\ServerRequestInterface;
 
 
 class PasswordAuthentication extends AuthMiddleware
 {
     private $headers;
-    private $session;
+    private $sessionManager;
     private $auth;
     private $cookie;
 
-    public function __construct(ResponseHeaders $headers, Session $session, Authentication $auth)
-    {
-        $this->headers = $headers;
-        $this->session = $session;
-        $this->auth    = $auth;
+    public function __construct(
+        ResponseHeaders $headers,
+        SessionManager $sessionManager,
+        Authentication $auth
+    ) {
+        $this->headers        = $headers;
+        $this->sessionManager = $sessionManager;
+        $this->auth           = $auth;
     }
 
     protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
@@ -54,8 +57,8 @@ class PasswordAuthentication extends AuthMiddleware
         }
 
         $id = $user->id();
-        //TODO: regenerate session ID
-        $this->session->set($this->auth::SESSION_USER_KEY, $id);
+        $this->sessionManager->session()->set($this->auth::SESSION_USER_KEY, $id);
+        $this->sessionManager->regenerateId();
 
         return $request->withAttribute(static::USER_ATTR, $id);
     }
@@ -68,8 +71,8 @@ class PasswordAuthentication extends AuthMiddleware
         if (!$login || !$password) { return null; }
 
         if ($persistent) {
-            $tokenKey     = uniqid();
-            $tokenHash    = bin2hex(random_bytes(32));
+            $tokenKey  = uniqid();
+            $tokenHash = bin2hex(random_bytes(32));
             $this->cookie = $tokenKey . $this->auth::TOKEN_SEPARATOR . $tokenHash;
         }
 

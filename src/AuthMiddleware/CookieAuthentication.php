@@ -13,23 +13,26 @@ namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\Authentication;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
-use Polymorphine\Http\Context\Session;
-use Psr\Http\Message\ServerRequestInterface;
 use Polymorphine\User\Data\Credentials;
+use Polymorphine\Http\Context\SessionManager;
+use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Psr\Http\Message\ServerRequestInterface;
 
 
 class CookieAuthentication extends AuthMiddleware
 {
     private $headers;
-    private $session;
+    private $sessionManager;
     private $auth;
 
-    public function __construct(ResponseHeaders $headers, Session $session, Authentication $auth)
-    {
-        $this->headers = $headers;
-        $this->session = $session;
-        $this->auth    = $auth;
+    public function __construct(
+        ResponseHeaders $headers,
+        SessionManager $sessionManager,
+        Authentication $auth
+    ) {
+        $this->headers        = $headers;
+        $this->sessionManager = $sessionManager;
+        $this->auth           = $auth;
     }
 
     public function authenticate(ServerRequestInterface $request): ServerRequestInterface
@@ -44,7 +47,8 @@ class CookieAuthentication extends AuthMiddleware
         }
 
         $id = $user->id();
-        $this->session->set($this->auth::SESSION_USER_KEY, $id);
+        $this->sessionManager->session()->set($this->auth::SESSION_USER_KEY, $id);
+        $this->sessionManager->regenerateId();
 
         return $request->withAttribute(static::USER_ATTR, $id);
     }
