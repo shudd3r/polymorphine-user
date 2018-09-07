@@ -12,34 +12,22 @@
 namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
-use Polymorphine\User\Authentication;
-use Polymorphine\Http\Context\Session;
+use Polymorphine\User\UserSession;
 use Psr\Http\Message\ServerRequestInterface;
-use Polymorphine\User\Data\Credentials;
 
 
 class SessionAuthentication extends AuthMiddleware
 {
-    private $session;
-    private $auth;
+    private $userSession;
 
-    public function __construct(Session $session, Authentication $auth)
+    public function __construct(UserSession $userSession)
     {
-        $this->session = $session;
-        $this->auth    = $auth;
+        $this->userSession = $userSession;
     }
 
     protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
-        $id = $this->session->get(Authentication::SESSION_USER_KEY);
-        if (!$id) { return $request; }
-
-        $user = $this->auth->signIn(new Credentials(['id' => $id]));
-        if (!$user->isLoggedIn()) {
-            $this->session->clear();
-            return $request;
-        }
-
-        return $request->withAttribute(static::USER_ATTR, $id);
+        $id = $this->userSession->resume();
+        return $id ? $request->withAttribute(static::USER_ATTR, $id) : $request;
     }
 }

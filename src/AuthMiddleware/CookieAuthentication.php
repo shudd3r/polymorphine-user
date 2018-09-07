@@ -12,9 +12,8 @@
 namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
-use Polymorphine\User\Authentication;
+use Polymorphine\User\UserSession;
 use Polymorphine\User\Data\Credentials;
-use Polymorphine\Http\Context\SessionManager;
 use Polymorphine\Http\Context\Response\ResponseHeaders;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -22,17 +21,11 @@ use Psr\Http\Message\ServerRequestInterface;
 class CookieAuthentication extends AuthMiddleware
 {
     private $headers;
-    private $sessionManager;
-    private $auth;
+    private $userSession;
 
-    public function __construct(
-        ResponseHeaders $headers,
-        SessionManager $sessionManager,
-        Authentication $auth
-    ) {
-        $this->headers        = $headers;
-        $this->sessionManager = $sessionManager;
-        $this->auth           = $auth;
+    public function __construct(ResponseHeaders $headers, UserSession $userSession) {
+        $this->headers     = $headers;
+        $this->userSession = $userSession;
     }
 
     public function authenticate(ServerRequestInterface $request): ServerRequestInterface
@@ -40,25 +33,20 @@ class CookieAuthentication extends AuthMiddleware
         $cookies = $request->getCookieParams();
         if (!$credentials = $this->credentials($cookies)) { return $request; }
 
-        $user = $this->auth->signIn($credentials);
-        if (!$user->isLoggedIn()) {
-            $this->headers->cookie($this->auth::REMEMBER_COOKIE)->remove();
+        if (!$id = $this->userSession->signIn($credentials)) {
+            $this->headers->cookie(UserSession::REMEMBER_COOKIE)->remove();
             return $request;
         }
-
-        $id = $user->id();
-        $this->sessionManager->session()->set($this->auth::SESSION_USER_KEY, $id);
-        $this->sessionManager->regenerateId();
 
         return $request->withAttribute(static::USER_ATTR, $id);
     }
 
     protected function credentials(array $cookies): ?Credentials
     {
-        $token = $cookies[$this->auth::REMEMBER_COOKIE] ?? null;
+        $token = $cookies[UserSession::REMEMBER_COOKIE] ?? null;
         if (!$token) { return null; }
 
-        [$key, $hash] = explode($this->auth::TOKEN_SEPARATOR, $token);
+        [$key, $hash] = explode(UserSession::TOKEN_SEPARATOR, $token);
         if (!$key || !$hash) { return null; }
 
         return new Credentials([

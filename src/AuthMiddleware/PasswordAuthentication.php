@@ -12,9 +12,8 @@
 namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
-use Polymorphine\User\Authentication;
+use Polymorphine\User\UserSession;
 use Polymorphine\User\Data\Credentials;
-use Polymorphine\Http\Context\SessionManager;
 use Polymorphine\Http\Context\Response\ResponseHeaders;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -22,18 +21,12 @@ use Psr\Http\Message\ServerRequestInterface;
 class PasswordAuthentication extends AuthMiddleware
 {
     private $headers;
-    private $sessionManager;
-    private $auth;
-    private $cookie;
+    private $userSession;
+    private $token;
 
-    public function __construct(
-        ResponseHeaders $headers,
-        SessionManager $sessionManager,
-        Authentication $auth
-    ) {
-        $this->headers        = $headers;
-        $this->sessionManager = $sessionManager;
-        $this->auth           = $auth;
+    public function __construct(ResponseHeaders $headers, UserSession $userSession) {
+        $this->headers     = $headers;
+        $this->userSession = $userSession;
     }
 
     protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
@@ -43,37 +36,29 @@ class PasswordAuthentication extends AuthMiddleware
         $credentials = $this->credentials($request->getParsedBody());
         if (!$credentials) { return $request; }
 
-        $user = $this->auth->signIn($credentials);
-        if (!$user->isLoggedIn()) {
-            $this->headers->cookie($this->auth::REMEMBER_COOKIE)->remove();
+        if (!$id = $this->userSession->signIn($credentials)) {
+            $this->headers->cookie(UserSession::REMEMBER_COOKIE)->remove();
             return $request;
         }
 
-        if ($this->cookie) {
-            $this->headers->cookie($this->auth::REMEMBER_COOKIE)
-                          ->httpOnly()
-                          ->permanent()
-                          ->value($this->cookie);
+        if ($this->token) {
+            $this->headers->cookie(UserSession::REMEMBER_COOKIE)->httpOnly()->permanent()->value($this->token);
         }
-
-        $id = $user->id();
-        $this->sessionManager->session()->set($this->auth::SESSION_USER_KEY, $id);
-        $this->sessionManager->regenerateId();
 
         return $request->withAttribute(static::USER_ATTR, $id);
     }
 
     private function credentials(array $data): ?Credentials
     {
-        $login      = $data[$this->auth::USER_LOGIN_FIELD] ?? null;
-        $password   = $data[$this->auth::USER_PASS_FIELD] ?? null;
-        $persistent = $data[$this->auth::REMEMBER_COOKIE] ?? null;
+        $login      = $data[UserSession::USER_LOGIN_FIELD] ?? null;
+        $password   = $data[UserSession::USER_PASS_FIELD] ?? null;
+        $persistent = $data[UserSession::REMEMBER_COOKIE] ?? null;
         if (!$login || !$password) { return null; }
 
         if ($persistent) {
             $tokenKey  = uniqid();
             $tokenHash = bin2hex(random_bytes(32));
-            $this->cookie = $tokenKey . $this->auth::TOKEN_SEPARATOR . $tokenHash;
+            $this->token = $tokenKey . UserSession::TOKEN_SEPARATOR . $tokenHash;
         }
 
         $emailLogin = strpos($login, '@');
