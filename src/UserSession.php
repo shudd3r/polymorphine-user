@@ -18,10 +18,6 @@ use Polymorphine\User\Data\Credentials;
 class UserSession
 {
     public const SESSION_USER_KEY = 'userId';
-    public const USER_LOGIN_FIELD = 'username';
-    public const USER_PASS_FIELD  = 'password';
-    public const REMEMBER_COOKIE  = 'remember';
-    public const TOKEN_SEPARATOR  = ':';
 
     private $authentication;
     private $sessionManager;

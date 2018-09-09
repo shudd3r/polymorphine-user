@@ -13,45 +13,30 @@ namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\UserSession;
-use Polymorphine\User\Data\Credentials;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Polymorphine\User\PersistentAuthCookie;
 use Psr\Http\Message\ServerRequestInterface;
 
 
 class CookieAuthentication extends AuthMiddleware
 {
-    private $headers;
     private $userSession;
+    private $authCookie;
 
-    public function __construct(ResponseHeaders $headers, UserSession $userSession) {
-        $this->headers     = $headers;
+    public function __construct(UserSession $userSession, PersistentAuthCookie $authCookie)
+    {
         $this->userSession = $userSession;
+        $this->authCookie  = $authCookie;
     }
 
-    public function authenticate(ServerRequestInterface $request): ServerRequestInterface
+    protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
         $cookies = $request->getCookieParams();
-        if (!$credentials = $this->credentials($cookies)) { return $request; }
+        if (!$credentials = $this->authCookie->credentials($cookies)) { return $request; }
 
         if (!$id = $this->userSession->signIn($credentials)) {
-            $this->headers->cookie(UserSession::REMEMBER_COOKIE)->remove();
-            return $request;
+            $this->authCookie->clear();
         }
 
         return $request->withAttribute(static::USER_ATTR, $id);
-    }
-
-    protected function credentials(array $cookies): ?Credentials
-    {
-        $token = $cookies[UserSession::REMEMBER_COOKIE] ?? null;
-        if (!$token) { return null; }
-
-        [$key, $hash] = explode(UserSession::TOKEN_SEPARATOR, $token);
-        if (!$key || !$hash) { return null; }
-
-        return new Credentials([
-            'tokenKey' => $key,
-            'token'    => $hash
-        ]);
     }
 }

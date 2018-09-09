@@ -13,36 +13,39 @@ namespace Polymorphine\User\AuthMiddleware;
 
 use Polymorphine\User\AuthMiddleware;
 use Polymorphine\User\UserSession;
+use Polymorphine\User\PersistentAuthCookie;
 use Polymorphine\User\Data\Credentials;
-use Polymorphine\Http\Context\Response\ResponseHeaders;
 use Psr\Http\Message\ServerRequestInterface;
 
 
 class PasswordAuthentication extends AuthMiddleware
 {
-    private $headers;
-    private $userSession;
-    private $token;
+    public const USER_LOGIN_FIELD = 'username';
+    public const USER_PASS_FIELD  = 'password';
+    public const REMEMBER_FIELD   = 'remember';
 
-    public function __construct(ResponseHeaders $headers, UserSession $userSession) {
-        $this->headers     = $headers;
+    private $userSession;
+    private $authCookie;
+
+    public function __construct(UserSession $userSession, PersistentAuthCookie $authCookie = null)
+    {
         $this->userSession = $userSession;
+        $this->authCookie  = $authCookie;
     }
 
     protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
         if ($request->getMethod() !== 'POST') { return $request; }
 
-        $credentials = $this->credentials($request->getParsedBody());
+        $payload     = $request->getParsedBody();
+        $credentials = $this->credentials($payload);
         if (!$credentials) { return $request; }
 
-        if (!$id = $this->userSession->signIn($credentials)) {
-            $this->headers->cookie(UserSession::REMEMBER_COOKIE)->remove();
-            return $request;
-        }
+        $id = $this->userSession->signIn($credentials);
+        if (!$id) { return $request; }
 
-        if ($this->token) {
-            $this->headers->cookie(UserSession::REMEMBER_COOKIE)->httpOnly()->permanent()->value($this->token);
+        if ($this->authCookie && isset($payload[static::REMEMBER_FIELD])) {
+            $this->authCookie->setToken($id);
         }
 
         return $request->withAttribute(static::USER_ATTR, $id);
@@ -50,24 +53,16 @@ class PasswordAuthentication extends AuthMiddleware
 
     private function credentials(array $data): ?Credentials
     {
-        $login      = $data[UserSession::USER_LOGIN_FIELD] ?? null;
-        $password   = $data[UserSession::USER_PASS_FIELD] ?? null;
-        $persistent = $data[UserSession::REMEMBER_COOKIE] ?? null;
-        if (!$login || !$password) { return null; }
+        $login    = $data[static::USER_LOGIN_FIELD] ?? null;
+        $password = $data[static::USER_PASS_FIELD] ?? null;
 
-        if ($persistent) {
-            $tokenKey  = uniqid();
-            $tokenHash = bin2hex(random_bytes(32));
-            $this->token = $tokenKey . UserSession::TOKEN_SEPARATOR . $tokenHash;
-        }
+        if (!$login || !$password) { return null; }
 
         $emailLogin = strpos($login, '@');
         return new Credentials([
             'name'     => $emailLogin ? null : $login,
             'email'    => $emailLogin ? $login : null,
-            'password' => $password,
-            'tokenKey' => $tokenKey ?? null,
-            'token'    => $tokenHash ?? null
+            'password' => $password
         ]);
     }
 }

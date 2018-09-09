@@ -23,12 +23,11 @@ class DbRecord extends Data
 
     public function __construct(array $data, Repository $repository)
     {
-        $this->repository = $repository;
-
         parent::__construct($data);
 
-        $this->password = (string) $this->pullFromData('password');
-        $this->token    = (string) $this->pullFromData('token');
+        $this->repository = $repository;
+        $this->password   = (string) $this->pullFromData('password');
+        $this->token      = (string) $this->pullFromData('token');
     }
 
     public function verifyPassword(string $password): bool
@@ -42,19 +41,6 @@ class DbRecord extends Data
 
     public function verifyToken(string $token): bool
     {
-        if (hash_equals($this->token, $this->hash($token))) { return true; }
-        $this->resetToken();
-        return false;
-    }
-
-    public function resetToken(string $tokenKey = null, string $token = null): void
-    {
-        $tokenHash = $token ? $this->hash($token) : '';
-        $this->repository->setToken($this->id, $tokenKey ?? '', $tokenHash);
-    }
-
-    private function hash(string $token): string
-    {
-        return hash('sha256', $token);
+        return hash_equals($this->token, hash('sha256', $token));
     }
 }
