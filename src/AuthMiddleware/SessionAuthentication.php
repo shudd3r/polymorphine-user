@@ -27,7 +27,6 @@ class SessionAuthentication extends AuthMiddleware
 
     protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
-        $id = $this->userSession->resume();
-        return $id ? $request->withAttribute(static::USER_ATTR, $id) : $request;
+        return $this->userSession->resume() ? $request->withAttribute(static::AUTH_ATTR, true) : $request;
     }
 }

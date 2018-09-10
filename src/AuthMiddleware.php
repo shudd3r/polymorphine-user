@@ -19,11 +19,11 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class AuthMiddleware implements MiddlewareInterface
 {
-    public const USER_ATTR = 'userId';
+    public const AUTH_ATTR = 'authenticated';
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $request->getAttribute(self::USER_ATTR)
+        return $request->getAttribute(self::AUTH_ATTR)
             ? $handler->handle($request)
             : $handler->handle($this->authenticate($request));
     }

@@ -19,38 +19,46 @@ class UserSession
 {
     public const SESSION_USER_KEY = 'userId';
 
-    private $authentication;
+    private $repository;
     private $sessionManager;
 
-    public function __construct(Authentication $authentication, SessionManager $sessionManager)
+    private $authenticatedUser;
+
+    public function __construct(SessionManager $sessionManager, Repository $repository)
     {
-        $this->authentication = $authentication;
         $this->sessionManager = $sessionManager;
+        $this->repository     = $repository;
     }
 
-    public function resume()
+    public function user(): AuthenticatedUser
+    {
+        return $this->authenticatedUser ?? $this->authenticatedUser = $this->repository->getAnonymousUser();
+    }
+
+    public function resume(): bool
     {
         $id = $this->sessionManager->session()->get(static::SESSION_USER_KEY);
-        if (!$id) { return null; }
+        if (!$id) { return false; }
 
-        $user = $this->authentication->signIn(new Credentials(['id' => $id]));
+        $user = $this->repository->getUser(new Credentials(['id' => $id]));
         if (!$user->isLoggedIn()) {
             $this->sessionManager->session()->clear();
-            return null;
+            return false;
         }
 
-        return $id;
+        $this->authenticatedUser = $user;
+        return true;
     }
 
-    public function signIn(Credentials $credentials)
+    public function signIn(Credentials $credentials): bool
     {
-        $user = $this->authentication->signIn($credentials);
-        if (!$user->isLoggedIn()) { return null; }
+        $user = $this->repository->getUser($credentials);
+        if (!$user->isLoggedIn()) { return false; }
 
-        $id = $user->id();
-        $this->sessionManager->session()->set(static::SESSION_USER_KEY, $id);
+        $this->sessionManager->session()->set(static::SESSION_USER_KEY, $user->id());
         $this->sessionManager->regenerateId();
 
-        return $id;
+        $this->authenticatedUser = $user;
+        return true;
     }
 }

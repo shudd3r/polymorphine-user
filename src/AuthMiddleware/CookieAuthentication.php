@@ -30,13 +30,14 @@ class CookieAuthentication extends AuthMiddleware
 
     protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
-        $cookies = $request->getCookieParams();
-        if (!$credentials = $this->authCookie->credentials($cookies)) { return $request; }
+        $credentials = $this->authCookie->credentials($request->getCookieParams());
+        if (!$credentials) { return $request; }
 
-        if (!$id = $this->userSession->signIn($credentials)) {
+        if (!$this->userSession->signIn($credentials)) {
             $this->authCookie->clear();
+            return $request;
         }
 
-        return $request->withAttribute(static::USER_ATTR, $id);
+        return $request->withAttribute(static::AUTH_ATTR, true);
     }
 }

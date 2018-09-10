@@ -41,14 +41,13 @@ class PasswordAuthentication extends AuthMiddleware
         $credentials = $this->credentials($payload);
         if (!$credentials) { return $request; }
 
-        $id = $this->userSession->signIn($credentials);
-        if (!$id) { return $request; }
+        if (!$this->userSession->signIn($credentials)) { return $request; }
 
         if ($this->authCookie && isset($payload[static::REMEMBER_FIELD])) {
-            $this->authCookie->setToken($id);
+            $this->authCookie->setToken($this->userSession->user()->id());
         }
 
-        return $request->withAttribute(static::USER_ATTR, $id);
+        return $request->withAttribute(static::AUTH_ATTR, true);
     }
 
     private function credentials(array $data): ?Credentials
