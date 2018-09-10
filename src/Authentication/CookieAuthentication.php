@@ -9,15 +9,15 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User\AuthMiddleware;
+namespace Polymorphine\User\Authentication;
 
-use Polymorphine\User\AuthMiddleware;
+use Polymorphine\User\Authentication;
 use Polymorphine\User\UserSession;
 use Polymorphine\User\PersistentAuthCookie;
 use Psr\Http\Message\ServerRequestInterface;
 
 
-class CookieAuthentication extends AuthMiddleware
+class CookieAuthentication implements Authentication
 {
     private $userSession;
     private $authCookie;
@@ -28,7 +28,7 @@ class CookieAuthentication extends AuthMiddleware
         $this->authCookie  = $authCookie;
     }
 
-    protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
+    public function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
         $credentials = $this->authCookie->credentials($request->getCookieParams());
         if (!$credentials) { return $request; }

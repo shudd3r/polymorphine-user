@@ -9,14 +9,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User\AuthMiddleware;
+namespace Polymorphine\User\Authentication;
 
-use Polymorphine\User\AuthMiddleware;
+use Polymorphine\User\Authentication;
 use Polymorphine\User\UserSession;
 use Psr\Http\Message\ServerRequestInterface;
 
 
-class SessionAuthentication extends AuthMiddleware
+class SessionAuthentication implements Authentication
 {
     private $userSession;
 
@@ -25,7 +25,7 @@ class SessionAuthentication extends AuthMiddleware
         $this->userSession = $userSession;
     }
 
-    protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
+    public function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
         return $this->userSession->resume() ? $request->withAttribute(static::AUTH_ATTR, true) : $request;
     }

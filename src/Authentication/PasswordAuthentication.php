@@ -9,16 +9,16 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User\AuthMiddleware;
+namespace Polymorphine\User\Authentication;
 
-use Polymorphine\User\AuthMiddleware;
+use Polymorphine\User\Authentication;
 use Polymorphine\User\UserSession;
 use Polymorphine\User\PersistentAuthCookie;
 use Polymorphine\User\Data\Credentials;
 use Psr\Http\Message\ServerRequestInterface;
 
 
-class PasswordAuthentication extends AuthMiddleware
+class PasswordAuthentication implements Authentication
 {
     public const USER_LOGIN_FIELD = 'username';
     public const USER_PASS_FIELD  = 'password';
@@ -33,7 +33,7 @@ class PasswordAuthentication extends AuthMiddleware
         $this->authCookie  = $authCookie;
     }
 
-    protected function authenticate(ServerRequestInterface $request): ServerRequestInterface
+    public function authenticate(ServerRequestInterface $request): ServerRequestInterface
     {
         if ($request->getMethod() !== 'POST') { return $request; }
 

@@ -17,16 +17,19 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 
-abstract class AuthMiddleware implements MiddlewareInterface
+class AuthMiddleware implements MiddlewareInterface
 {
-    public const AUTH_ATTR = 'authenticated';
+    private $auth;
+
+    public function __construct(Authentication $auth)
+    {
+        $this->auth = $auth;
+    }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $request->getAttribute(self::AUTH_ATTR)
+        return $request->getAttribute(Authentication::AUTH_ATTR)
             ? $handler->handle($request)
-            : $handler->handle($this->authenticate($request));
+            : $handler->handle($this->auth->authenticate($request));
     }
-
-    abstract protected function authenticate(ServerRequestInterface $request): ServerRequestInterface;
 }
