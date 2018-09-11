@@ -11,7 +11,7 @@
 
 namespace Polymorphine\User;
 
-use Polymorphine\Http\Context\Response\ResponseHeaders;
+use Polymorphine\Http\Context\ResponseHeaders;
 use Polymorphine\User\Data\Credentials;
 
 

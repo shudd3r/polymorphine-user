@@ -12,7 +12,7 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
-use Polymorphine\Http\Context\Security\CsrfPersistentTokenContext;
+use Polymorphine\Http\Context\CsrfProtection\CsrfPersistentTokenContext;
 use Psr\Http\Message\ServerRequestInterface;
 
 
