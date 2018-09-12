@@ -36,8 +36,10 @@ class PersistentAuthCookie
 
         $this->repository->setToken($id, $key, hash('sha256', $token));
         $this->headers->cookie(static::COOKIE_NAME)
-                      ->httpOnly()
                       ->permanent()
+                      ->secure()
+                      ->httpOnly()
+                      ->sameSiteLax()
                       ->value($key . static::TOKEN_SEPARATOR . $token);
     }
 
