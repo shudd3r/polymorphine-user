@@ -22,11 +22,13 @@ class PersistentAuthCookie
 
     private $headers;
     private $repository;
+    private $cookieOptions;
 
-    public function __construct(ResponseHeaders $headers, Repository $repository)
+    public function __construct(ResponseHeaders $headers, Repository $repository, array $cookieOptions = [])
     {
-        $this->headers    = $headers;
-        $this->repository = $repository;
+        $this->headers       = $headers;
+        $this->repository    = $repository;
+        $this->cookieOptions = $cookieOptions;
     }
 
     public function setToken($id): void
@@ -35,11 +37,9 @@ class PersistentAuthCookie
         $token = bin2hex(random_bytes(32));
 
         $this->repository->setToken($id, $key, hash('sha256', $token));
-        $this->headers->cookie(static::COOKIE_NAME)
-                      ->permanent()
-                      ->secure()
-                      ->httpOnly()
-                      ->sameSiteLax()
+
+        $attributes = $this->cookieOptions + ['httpOnly' => true, 'sameSite' => 'Lax', 'expires' => false];
+        $this->headers->cookie(static::COOKIE_NAME, $attributes)
                       ->value($key . static::TOKEN_SEPARATOR . $token);
     }
 
