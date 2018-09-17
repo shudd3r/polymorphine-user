@@ -28,8 +28,12 @@ class AuthMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $request->getAttribute(Authentication::AUTH_ATTR)
-            ? $handler->handle($request)
-            : $handler->handle($this->auth->authenticate($request));
+        if (!$request->getAttribute(Authentication::AUTH_ATTR)) {
+            $authenticated = $this->auth->authenticate($request)->isLoggedIn();
+            $request = $request->withAttribute(Authentication::AUTH_ATTR, $authenticated);
+        }
+
+        return $handler->handle($request);
+
     }
 }

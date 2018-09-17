@@ -12,6 +12,7 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
+use Polymorphine\User\AuthenticatedUser;
 use Polymorphine\User\UserSession;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -25,8 +26,8 @@ class SessionAuthentication implements Authentication
         $this->userSession = $userSession;
     }
 
-    public function authenticate(ServerRequestInterface $request): ServerRequestInterface
+    public function authenticate(ServerRequestInterface $request): AuthenticatedUser
     {
-        return $this->userSession->resume() ? $request->withAttribute(static::AUTH_ATTR, true) : $request;
+        return $this->userSession->resume();
     }
 }

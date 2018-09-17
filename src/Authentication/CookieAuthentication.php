@@ -12,6 +12,7 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
+use Polymorphine\User\AuthenticatedUser;
 use Polymorphine\User\UserSession;
 use Polymorphine\User\PersistentAuthCookie;
 use Psr\Http\Message\ServerRequestInterface;
@@ -28,16 +29,16 @@ class CookieAuthentication implements Authentication
         $this->authCookie  = $authCookie;
     }
 
-    public function authenticate(ServerRequestInterface $request): ServerRequestInterface
+    public function authenticate(ServerRequestInterface $request): AuthenticatedUser
     {
         $credentials = $this->authCookie->credentials($request->getCookieParams());
-        if (!$credentials) { return $request; }
+        if (!$credentials) { return $this->userSession->user(); }
 
-        if (!$this->userSession->signIn($credentials)) {
+        $user = $this->userSession->signIn($credentials);
+        if (!$user->isLoggedIn()) {
             $this->authCookie->clear();
-            return $request;
         }
 
-        return $request->withAttribute(static::AUTH_ATTR, true);
+        return $user;
     }
 }

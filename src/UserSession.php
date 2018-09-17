@@ -35,30 +35,27 @@ class UserSession
         return $this->authenticatedUser ?? $this->authenticatedUser = $this->repository->getAnonymousUser();
     }
 
-    public function resume(): bool
+    public function resume(): AuthenticatedUser
     {
         $id = $this->session->data()->get(static::SESSION_USER_KEY);
-        if (!$id) { return false; }
+        if (!$id) { return $this->user(); }
 
-        $user = $this->repository->getUser(new Credentials(['id' => $id]));
-        if (!$user->isLoggedIn()) {
+        $this->authenticatedUser = $this->repository->getUser(new Credentials(['id' => $id]));
+        if (!$this->authenticatedUser->isLoggedIn()) {
             $this->session->data()->clear();
-            return false;
         }
 
-        $this->authenticatedUser = $user;
-        return true;
+        return $this->authenticatedUser;
     }
 
-    public function signIn(Credentials $credentials): bool
+    public function signIn(Credentials $credentials): AuthenticatedUser
     {
-        $user = $this->repository->getUser($credentials);
-        if (!$user->isLoggedIn()) { return false; }
+        $this->authenticatedUser = $this->repository->getUser($credentials);
+        if ($this->authenticatedUser->isLoggedIn()) {
+            $this->session->resetContext();
+            $this->session->data()->set(static::SESSION_USER_KEY, $this->authenticatedUser->id());
+        }
 
-        $this->session->resetContext();
-        $this->session->data()->set(static::SESSION_USER_KEY, $user->id());
-
-        $this->authenticatedUser = $user;
-        return true;
+        return $this->authenticatedUser;
     }
 }

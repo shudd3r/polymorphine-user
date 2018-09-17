@@ -18,5 +18,5 @@ interface Authentication
 {
     public const AUTH_ATTR = 'authenticated';
 
-    public function authenticate(ServerRequestInterface $request): ServerRequestInterface;
+    public function authenticate(ServerRequestInterface $request): AuthenticatedUser;
 }
