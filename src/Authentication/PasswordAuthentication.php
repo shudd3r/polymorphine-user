@@ -14,7 +14,6 @@ namespace Polymorphine\User\Authentication;
 use Polymorphine\User\Authentication;
 use Polymorphine\User\AuthenticatedUser;
 use Polymorphine\User\UserSession;
-use Polymorphine\User\PersistentAuthCookie;
 use Polymorphine\User\Data\Credentials;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -23,31 +22,24 @@ class PasswordAuthentication implements Authentication
 {
     public const USER_LOGIN_FIELD = 'username';
     public const USER_PASS_FIELD  = 'password';
-    public const REMEMBER_FIELD   = 'remember';
 
     private $userSession;
-    private $authCookie;
 
-    public function __construct(UserSession $userSession, PersistentAuthCookie $authCookie = null)
+    public function __construct(UserSession $userSession)
     {
         $this->userSession = $userSession;
-        $this->authCookie  = $authCookie;
     }
 
     public function authenticate(ServerRequestInterface $request): AuthenticatedUser
     {
-        if ($request->getMethod() !== 'POST') { return $this->userSession->user(); }
+        if ($request->getMethod() !== 'POST') {
+            return $this->userSession->user();
+        }
 
         $payload     = $request->getParsedBody();
         $credentials = $this->credentials($payload);
-        if (!$credentials) { return $this->userSession->user(); }
 
-        $user = $this->userSession->signIn($credentials);
-        if ($user->isLoggedIn() && $this->authCookie && isset($payload[static::REMEMBER_FIELD])) {
-            $this->authCookie->setToken($user->id());
-        }
-
-        return $user;
+        return $credentials ? $this->userSession->signIn($credentials) : $this->userSession->user();
     }
 
     private function credentials(array $data): ?Credentials
