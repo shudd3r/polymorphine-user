@@ -17,11 +17,12 @@ use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 
 class FakeResponseHeaders implements ResponseHeaders
 {
-    public $data = [];
+    public $data           = [];
+    public $cookiesRemoved = [];
 
     public function cookie(string $name, array $attributes = []): CookieSetup
     {
-        return new CookieSetup($name, $this, $attributes);
+        return new MockedCookieSetup($name, $this, $attributes);
     }
 
     public function add(string $name, string $header): void

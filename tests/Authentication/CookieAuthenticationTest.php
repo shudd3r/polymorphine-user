@@ -26,6 +26,8 @@ use Polymorphine\User\UserSession;
 class CookieAuthenticationTest extends TestCase
 {
     private $headers;
+
+    /** @var FakeSession */
     private $session;
 
     public function testInstantiation()
@@ -33,30 +35,58 @@ class CookieAuthenticationTest extends TestCase
         $this->assertInstanceOf(Authentication::class, $this->auth());
     }
 
-    public function testSuccessfulAuth()
+    public function testSuccessfulAuthentication()
     {
-        $auth = $this->auth(true);
-
-        $request = new FakeServerRequest('GET');
-        $request->cookies[PersistentAuthCookie::COOKIE_NAME] = 'key' . PersistentAuthCookie::TOKEN_SEPARATOR . 'hash';
+        $auth    = $this->auth(true);
+        $request = $this->request(true);
 
         $this->assertTrue($auth->authenticate($request)->isLoggedIn());
-        $this->assertSame(['userId' => 1], $this->session->getData());
+        $this->assertSame(1, $this->session->data()->get('userId'));
         $this->assertTrue($this->session->regeneratedId);
     }
 
-    public function testFailedAuth()
+    public function testMissingCookie()
     {
-        $auth = $this->auth(false);
-
-        $request = new FakeServerRequest('GET');
-        $request->cookies[PersistentAuthCookie::COOKIE_NAME] = 'key' . PersistentAuthCookie::TOKEN_SEPARATOR . 'hash';
+        $auth    = $this->auth(true);
+        $request = $this->request(false);
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
-        $this->assertSame([], $this->session->getData());
+        $this->assertNull($this->session->data()->get('userId'));
+        $this->assertFalse(isset($this->headers->cookiesRemoved[PersistentAuthCookie::COOKIE_NAME]));
         $this->assertFalse($this->session->regeneratedId);
-        $cookie = $this->headers->data['Set-Cookie'][0];
-        $this->assertSame('remember=', substr($cookie, 0, strpos($cookie, ';')));
+    }
+
+    public function testNotMatchingCookieToken()
+    {
+        $auth    = $this->auth(false);
+        $request = $this->request(true);
+
+        $this->assertFalse($auth->authenticate($request)->isLoggedIn());
+        $this->assertNull($this->session->data()->get('userId'));
+        $this->assertTrue($this->headers->cookiesRemoved[PersistentAuthCookie::COOKIE_NAME]);
+        $this->assertFalse($this->session->regeneratedId);
+    }
+
+    public function testInvalidToken()
+    {
+        $auth    = $this->auth(true);
+        $request = $this->request(false);
+        $request->cookies[PersistentAuthCookie::COOKIE_NAME] = 'InvalidString';
+
+        $this->assertFalse($auth->authenticate($request)->isLoggedIn());
+        $this->assertNull($this->session->data()->get('userId'));
+        $this->assertTrue($this->headers->cookiesRemoved[PersistentAuthCookie::COOKIE_NAME]);
+        $this->assertFalse($this->session->regeneratedId);
+    }
+
+    private function request($cookie = true)
+    {
+        $request = new FakeServerRequest('GET');
+        if ($cookie) {
+            $token = 'key' . PersistentAuthCookie::TOKEN_SEPARATOR . 'hash';
+            $request->cookies[PersistentAuthCookie::COOKIE_NAME] = $token;
+        }
+        return $request;
     }
 
     private function auth($success = true)

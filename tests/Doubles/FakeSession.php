@@ -17,7 +17,6 @@ use Polymorphine\Http\Context\Session;
 
 class FakeSession implements Session
 {
-    public $data = [];
     public $regeneratedId = false;
 
     /** @var SessionData */
@@ -29,7 +28,7 @@ class FakeSession implements Session
 
     public function data(): SessionData
     {
-        return $this->storage ?: $this->storage = new SessionData($this, $this->data);
+        return $this->storage ?: $this->storage = new SessionData($this, []);
     }
 
     public function resetContext(): void
@@ -39,13 +38,5 @@ class FakeSession implements Session
 
     public function commit(array $data): void
     {
-        $this->data = $data;
-    }
-
-    public function getData()
-    {
-        if ($this->storage) { $this->storage->commit(); }
-        $this->storage = null;
-        return $this->data;
     }
 }
