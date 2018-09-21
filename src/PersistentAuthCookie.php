@@ -48,8 +48,11 @@ class PersistentAuthCookie
         $token = $cookies[static::COOKIE_NAME] ?? null;
         if (!$token) { return null; }
 
-        [$key, $hash] = explode(static::TOKEN_SEPARATOR, $token);
-        if (!$key || !$hash) { return null; }
+        [$key, $hash] = explode(static::TOKEN_SEPARATOR, $token) + [false, false];
+        if (!$key || !$hash) {
+            $this->clear();
+            return null;
+        }
 
         return new Credentials([
             'tokenKey' => $key,
