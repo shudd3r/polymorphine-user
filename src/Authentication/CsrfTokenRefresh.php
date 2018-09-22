@@ -13,26 +13,26 @@ namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
 use Polymorphine\User\AuthenticatedUser;
-use Polymorphine\Http\Context\CsrfProtection\CsrfPersistentTokenContext;
+use Polymorphine\Http\Context\CsrfProtection;
 use Psr\Http\Message\ServerRequestInterface;
 
 
 class CsrfTokenRefresh implements Authentication
 {
-    private $tokenContext;
+    private $csrfProtection;
     private $authentication;
 
-    public function __construct(Authentication $authentication, CsrfPersistentTokenContext $tokenContext)
+    public function __construct(Authentication $authentication, CsrfProtection $csrfProtection)
     {
         $this->authentication = $authentication;
-        $this->tokenContext   = $tokenContext;
+        $this->csrfProtection = $csrfProtection;
     }
 
     public function authenticate(ServerRequestInterface $request): AuthenticatedUser
     {
         $user = $this->authentication->authenticate($request);
         if ($user->isLoggedIn()) {
-            $this->tokenContext->resetToken();
+            $this->csrfProtection->resetToken();
         }
 
         return $user;
