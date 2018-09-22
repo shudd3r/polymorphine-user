@@ -14,12 +14,12 @@ namespace Polymorphine\User\Tests\Doubles;
 use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 
 
-class MockedCookieSetup extends CookieSetup
+class FakeCookieSetup extends CookieSetup
 {
     private $name;
     private $headers;
 
-    public function __construct(string $name, FakeResponseHeaders $headers, array $attributes = [])
+    public function __construct(string $name, MockedResponseHeaders $headers, array $attributes = [])
     {
         $this->name    = $name;
         $this->headers = $headers;

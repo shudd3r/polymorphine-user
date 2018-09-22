@@ -15,14 +15,14 @@ use Polymorphine\Http\Context\ResponseHeaders;
 use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
 
 
-class FakeResponseHeaders implements ResponseHeaders
+class MockedResponseHeaders implements ResponseHeaders
 {
     public $data           = [];
     public $cookiesRemoved = [];
 
     public function cookie(string $name, array $attributes = []): CookieSetup
     {
-        return new MockedCookieSetup($name, $this, $attributes);
+        return new FakeCookieSetup($name, $this, $attributes);
     }
 
     public function add(string $name, string $header): void

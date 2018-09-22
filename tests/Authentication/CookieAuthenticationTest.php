@@ -16,9 +16,9 @@ use Polymorphine\User\Authentication;
 use Polymorphine\User\Authentication\CookieAuthentication;
 use Polymorphine\User\PersistentAuthCookie;
 use Polymorphine\User\Tests\Doubles\FakeAuthUser;
-use Polymorphine\User\Tests\Doubles\FakeResponseHeaders;
+use Polymorphine\User\Tests\Doubles\MockedResponseHeaders;
 use Polymorphine\User\Tests\Doubles\FakeServerRequest;
-use Polymorphine\User\Tests\Doubles\FakeSession;
+use Polymorphine\User\Tests\Doubles\MockedSession;
 use Polymorphine\User\Tests\Doubles\FakeUsersRepository;
 use Polymorphine\User\UserSession;
 
@@ -27,7 +27,7 @@ class CookieAuthenticationTest extends TestCase
 {
     private $headers;
 
-    /** @var FakeSession */
+    /** @var MockedSession */
     private $session;
 
     public function testInstantiation()
@@ -81,7 +81,7 @@ class CookieAuthenticationTest extends TestCase
 
     private function request($cookie = true)
     {
-        $request = new FakeServerRequest('GET');
+        $request = new FakeServerRequest();
         if ($cookie) {
             $token = 'key' . PersistentAuthCookie::TOKEN_SEPARATOR . 'hash';
             $request->cookies[PersistentAuthCookie::COOKIE_NAME] = $token;
@@ -91,8 +91,8 @@ class CookieAuthenticationTest extends TestCase
 
     private function auth($success = true)
     {
-        $this->headers = new FakeResponseHeaders();
-        $this->session = new FakeSession();
+        $this->headers = new MockedResponseHeaders();
+        $this->session = new MockedSession();
 
         $userRepo = $success
             ? new FakeUsersRepository(new FakeAuthUser(1, 'Username'))

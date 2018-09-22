@@ -15,7 +15,7 @@ use Polymorphine\Http\Context\Session\SessionData;
 use Polymorphine\Http\Context\Session;
 
 
-class FakeSession implements Session
+class MockedSession implements Session
 {
     public $regeneratedId = false;
 
