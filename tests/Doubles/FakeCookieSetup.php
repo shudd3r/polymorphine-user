@@ -26,6 +26,12 @@ class FakeCookieSetup extends CookieSetup
         parent::__construct($name, $headers, $attributes);
     }
 
+    public function value(string $value): void
+    {
+        $this->headers->cookieValue[$this->name] = $value;
+        parent::value($value);
+    }
+
     public function remove(): void
     {
         $this->headers->cookiesRemoved[$this->name] = true;

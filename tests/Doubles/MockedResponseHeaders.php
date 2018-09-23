@@ -19,6 +19,7 @@ class MockedResponseHeaders implements ResponseHeaders
 {
     public $data           = [];
     public $cookiesRemoved = [];
+    public $cookieValue    = [];
 
     public function cookie(string $name, array $attributes = []): CookieSetup
     {

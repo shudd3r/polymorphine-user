@@ -20,8 +20,8 @@ use Polymorphine\User\Data\DbRecord;
 
 class FakeUsersRepository extends Repository
 {
-    public $token    = [];
-    public $password = [];
+    public $token;
+    public $password;
 
     public $user;
     public $guest;
@@ -44,7 +44,7 @@ class FakeUsersRepository extends Repository
 
     public function setToken(int $id, string $tokenKey, string $token)
     {
-        $this->token = ['id' => $id, 'tokenKey' => $tokenKey, 'token' => $token];
+        $this->token = ['id' => $id, 'key' => $tokenKey, 'token' => $token];
     }
 
     public function setPassword(int $id, string $password)
