@@ -12,36 +12,43 @@
 namespace Polymorphine\User\Tests\Authentication;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\User\Authentication;
 use Polymorphine\User\Authentication\CookieAuthentication;
 use Polymorphine\User\PersistentAuthCookie;
-use Polymorphine\User\Tests\Doubles\FakeAuthUser;
-use Polymorphine\User\Tests\Doubles\MockedResponseHeaders;
-use Polymorphine\User\Tests\Doubles\FakeServerRequest;
-use Polymorphine\User\Tests\Doubles\MockedSession;
-use Polymorphine\User\Tests\Doubles\FakeUsersRepository;
 use Polymorphine\User\UserSession;
+use Polymorphine\User\Data\Credentials;
+use Polymorphine\User\Tests\Doubles\FakeServerRequest;
+use Polymorphine\User\Tests\Doubles\FakeAuthUser;
+use Polymorphine\User\Tests\Doubles\MockedUsersRepository;
+use Polymorphine\User\Tests\Doubles\MockedResponseHeaders;
+use Polymorphine\User\Tests\Doubles\MockedSession;
 
 
 class CookieAuthenticationTest extends TestCase
 {
+    /** @var MockedResponseHeaders */
     private $headers;
 
     /** @var MockedSession */
     private $session;
 
+    /** @var MockedUsersRepository */
+    private $users;
+
     public function testInstantiation()
     {
-        $this->assertInstanceOf(Authentication::class, $this->auth());
+        $this->assertInstanceOf(CookieAuthentication::class, $this->auth());
     }
 
     public function testSuccessfulAuthentication()
     {
-        $auth    = $this->auth(true);
-        $request = $this->request(true);
+        $token   = ['tokenKey' => 'key', 'token' => 'hash'];
+        $cookie  = $token['tokenKey'] . PersistentAuthCookie::TOKEN_SEPARATOR . $token['token'];
+        $request = $this->request($cookie);
 
-        $this->assertTrue($auth->authenticate($request)->isLoggedIn());
-        $this->assertSame(1, $this->session->data()->get('userId'));
+        $this->assertTrue($this->auth(true)->authenticate($request)->isLoggedIn());
+        $this->assertEquals(new Credentials($token), $this->users->credentialsUsed);
+        $this->assertSame(1, $this->session->data()->get(UserSession::SESSION_USER_KEY));
+        $this->assertFalse(isset($this->headers->cookiesRemoved[PersistentAuthCookie::COOKIE_NAME]));
         $this->assertTrue($this->session->regeneratedId);
     }
 
@@ -51,18 +58,21 @@ class CookieAuthenticationTest extends TestCase
         $request = $this->request(false);
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
-        $this->assertNull($this->session->data()->get('userId'));
+        $this->assertNull($this->users->credentialsUsed);
+        $this->assertNull($this->session->data()->get(UserSession::SESSION_USER_KEY));
         $this->assertFalse(isset($this->headers->cookiesRemoved[PersistentAuthCookie::COOKIE_NAME]));
         $this->assertFalse($this->session->regeneratedId);
     }
 
     public function testNotMatchingCookieToken()
     {
-        $auth    = $this->auth(false);
-        $request = $this->request(true);
+        $token   = ['tokenKey' => 'key', 'token' => 'hash'];
+        $cookie  = $token['tokenKey'] . PersistentAuthCookie::TOKEN_SEPARATOR . $token['token'];
+        $request = $this->request($cookie);
 
-        $this->assertFalse($auth->authenticate($request)->isLoggedIn());
-        $this->assertNull($this->session->data()->get('userId'));
+        $this->assertFalse($this->auth(false)->authenticate($request)->isLoggedIn());
+        $this->assertEquals(new Credentials($token), $this->users->credentialsUsed);
+        $this->assertNull($this->session->data()->get(UserSession::SESSION_USER_KEY));
         $this->assertTrue($this->headers->cookiesRemoved[PersistentAuthCookie::COOKIE_NAME]);
         $this->assertFalse($this->session->regeneratedId);
     }
@@ -70,21 +80,20 @@ class CookieAuthenticationTest extends TestCase
     public function testInvalidToken()
     {
         $auth    = $this->auth(true);
-        $request = $this->request(false);
-        $request->cookies[PersistentAuthCookie::COOKIE_NAME] = 'InvalidString';
+        $request = $this->request('invalidString');
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
-        $this->assertNull($this->session->data()->get('userId'));
+        $this->assertNull($this->users->credentialsUsed);
+        $this->assertNull($this->session->data()->get(UserSession::SESSION_USER_KEY));
         $this->assertTrue($this->headers->cookiesRemoved[PersistentAuthCookie::COOKIE_NAME]);
         $this->assertFalse($this->session->regeneratedId);
     }
 
-    private function request($cookie = true)
+    private function request(?string $cookie = null)
     {
         $request = new FakeServerRequest();
         if ($cookie) {
-            $token = 'key' . PersistentAuthCookie::TOKEN_SEPARATOR . 'hash';
-            $request->cookies[PersistentAuthCookie::COOKIE_NAME] = $token;
+            $request->cookies[PersistentAuthCookie::COOKIE_NAME] = $cookie;
         }
         return $request;
     }
@@ -94,13 +103,13 @@ class CookieAuthenticationTest extends TestCase
         $this->headers = new MockedResponseHeaders();
         $this->session = new MockedSession();
 
-        $userRepo = $success
-            ? new FakeUsersRepository(new FakeAuthUser(1, 'Username'))
-            : new FakeUsersRepository();
+        $this->users = $success
+            ? new MockedUsersRepository(new FakeAuthUser(1, 'Username'))
+            : new MockedUsersRepository();
 
         return new CookieAuthentication(
-            new UserSession($this->session, $userRepo),
-            new PersistentAuthCookie($this->headers, $userRepo)
+            new UserSession($this->session, $this->users),
+            new PersistentAuthCookie($this->headers, $this->users)
         );
     }
 }

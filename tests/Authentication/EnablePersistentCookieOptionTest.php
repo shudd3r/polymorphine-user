@@ -13,10 +13,10 @@ namespace Polymorphine\User\Tests\Authentication;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\User\Authentication\EnablePersistentCookieOption;
-use Polymorphine\User\PersistentAuthCookie as AuthCookie;
-use Polymorphine\User\Tests\Doubles\FakeAuthentication;
+use Polymorphine\User\PersistentAuthCookie;
 use Polymorphine\User\Tests\Doubles\FakeServerRequest;
-use Polymorphine\User\Tests\Doubles\FakeUsersRepository;
+use Polymorphine\User\Tests\Doubles\FakeAuthentication;
+use Polymorphine\User\Tests\Doubles\MockedUsersRepository;
 use Polymorphine\User\Tests\Doubles\MockedResponseHeaders;
 
 
@@ -25,7 +25,7 @@ class EnablePersistentCookieOptionTest extends TestCase
     /** @var MockedResponseHeaders */
     private $headers;
 
-    /** @var FakeUsersRepository */
+    /** @var MockedUsersRepository */
     private $repository;
 
     public function testInstantiation()
@@ -52,8 +52,8 @@ class EnablePersistentCookieOptionTest extends TestCase
         $this->assertTrue(isset($this->repository->token));
         $this->assertTrue(isset($this->headers->data['Set-Cookie']));
 
-        $cookie = $this->headers->cookieValue[AuthCookie::COOKIE_NAME];
-        [$key, $token] = explode(AuthCookie::TOKEN_SEPARATOR, $cookie);
+        $cookie = $this->headers->cookieValue[PersistentAuthCookie::COOKIE_NAME];
+        [$key, $token] = explode(PersistentAuthCookie::TOKEN_SEPARATOR, $cookie);
         $this->assertSame(['id' => 1, 'key' => $key, 'token' => hash('sha256', $token)], $this->repository->token);
     }
 
@@ -79,11 +79,11 @@ class EnablePersistentCookieOptionTest extends TestCase
     private function auth(bool $success = true)
     {
         $this->headers    = new MockedResponseHeaders();
-        $this->repository = new FakeUsersRepository();
+        $this->repository = new MockedUsersRepository();
 
         return new EnablePersistentCookieOption(
             new FakeAuthentication($success),
-            new AuthCookie($this->headers, $this->repository)
+            new PersistentAuthCookie($this->headers, $this->repository)
         );
     }
 }

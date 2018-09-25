@@ -18,13 +18,16 @@ use Polymorphine\User\Data\Credentials;
 use Polymorphine\User\Data\DbRecord;
 
 
-class FakeUsersRepository extends Repository
+class MockedUsersRepository extends Repository
 {
     public $token;
     public $password;
 
     public $user;
     public $guest;
+
+    /** @var Credentials */
+    public $credentialsUsed;
 
     public function __construct(FakeAuthUser $user = null)
     {
@@ -34,6 +37,7 @@ class FakeUsersRepository extends Repository
 
     public function getUser(Credentials $credentials): AuthenticatedUser
     {
+        $this->credentialsUsed = $credentials;
         return $this->user;
     }
 

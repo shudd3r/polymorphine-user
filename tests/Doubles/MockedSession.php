@@ -22,13 +22,18 @@ class MockedSession implements Session
     /** @var SessionData */
     private $storage;
 
+    public function __construct(array $sessionData = [])
+    {
+        $this->storage = new SessionData($this, $sessionData);
+    }
+
     public function start(): void
     {
     }
 
     public function data(): SessionData
     {
-        return $this->storage ?: $this->storage = new SessionData($this, []);
+        return $this->storage;
     }
 
     public function resetContext(): void

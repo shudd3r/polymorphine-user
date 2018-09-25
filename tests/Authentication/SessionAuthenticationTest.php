@@ -11,13 +11,14 @@
 
 namespace Polymorphine\User\Tests\Authentication;
 
-use Polymorphine\User\Authentication\SessionAuthentication;
 use PHPUnit\Framework\TestCase;
-use Polymorphine\User\Tests\Doubles\FakeAuthUser;
-use Polymorphine\User\Tests\Doubles\FakeServerRequest;
-use Polymorphine\User\Tests\Doubles\FakeUsersRepository;
-use Polymorphine\User\Tests\Doubles\MockedSession;
+use Polymorphine\User\Authentication\SessionAuthentication;
 use Polymorphine\User\UserSession;
+use Polymorphine\User\Data\Credentials;
+use Polymorphine\User\Tests\Doubles\FakeServerRequest;
+use Polymorphine\User\Tests\Doubles\FakeAuthUser;
+use Polymorphine\User\Tests\Doubles\MockedUsersRepository;
+use Polymorphine\User\Tests\Doubles\MockedSession;
 
 
 class SessionAuthenticationTest extends TestCase
@@ -25,7 +26,7 @@ class SessionAuthenticationTest extends TestCase
     /** @var MockedSession */
     private $session;
 
-    /** @var FakeUsersRepository */
+    /** @var MockedUsersRepository */
     private $users;
 
     public function testInstantiation()
@@ -36,31 +37,34 @@ class SessionAuthenticationTest extends TestCase
     public function testSessionDataWithoutUserId()
     {
         $this->assertFalse($this->auth(true)->authenticate(new FakeServerRequest())->isLoggedIn());
+        $this->assertNull($this->users->credentialsUsed);
     }
 
-    public function testSessionSuccessfullyResumed()
+    public function testSessionResumed()
     {
-        $auth = $this->auth(true);
-        $this->session->data()->set(UserSession::SESSION_USER_KEY, 1);
+        $userId = 1234;
+        $auth   = $this->auth(true, [UserSession::SESSION_USER_KEY => $userId]);
 
         $this->assertTrue($auth->authenticate(new FakeServerRequest())->isLoggedIn());
+        $this->assertEquals(new Credentials(['id' => $userId]), $this->users->credentialsUsed);
     }
 
     public function testSessionWithInvalidUserId()
     {
-        $auth = $this->auth(false);
-        $this->session->data()->set(UserSession::SESSION_USER_KEY, 1);
+        $userId = 1234;
+        $auth   = $this->auth(false, [UserSession::SESSION_USER_KEY => $userId]);
 
         $this->assertFalse($auth->authenticate(new FakeServerRequest())->isLoggedIn());
+        $this->assertEquals(new Credentials(['id' => $userId]), $this->users->credentialsUsed);
     }
 
-    private function auth($success = true)
+    private function auth(bool $success = true, array $session = [])
     {
-        $this->session = new MockedSession();
+        $this->session = new MockedSession($session);
 
         $this->users = $success
-            ? new FakeUsersRepository(new FakeAuthUser(1, 'Username'))
-            : new FakeUsersRepository();
+            ? new MockedUsersRepository(new FakeAuthUser(1, 'Username'))
+            : new MockedUsersRepository();
 
         return new SessionAuthentication(
             new UserSession($this->session, $this->users)

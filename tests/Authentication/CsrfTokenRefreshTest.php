@@ -13,9 +13,9 @@ namespace Polymorphine\User\Tests\Authentication;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\User\Authentication\CsrfTokenRefresh;
+use Polymorphine\User\Tests\Doubles\FakeServerRequest;
 use Polymorphine\User\Tests\Doubles\FakeAuthentication;
 use Polymorphine\User\Tests\Doubles\MockedCsrfProtection;
-use Polymorphine\User\Tests\Doubles\FakeServerRequest;
 
 
 class CsrfTokenRefreshTest extends TestCase
