@@ -49,10 +49,10 @@ class PasswordAuthentication implements Authentication
 
         if (!$login || !$password) { return null; }
 
-        $emailLogin = strpos($login, '@');
+        $email = filter_var($login, FILTER_VALIDATE_EMAIL) ?: null;
         return new Credentials([
-            'name'     => $emailLogin ? null : $login,
-            'email'    => $emailLogin ? $login : null,
+            'name'     => $email ? null : $login,
+            'email'    => $email,
             'password' => $password
         ]);
     }
