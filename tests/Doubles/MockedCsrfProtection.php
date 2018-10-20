@@ -11,8 +11,8 @@
 
 namespace Polymorphine\User\Tests\Doubles;
 
-use Polymorphine\Http\Context\CsrfProtection;
-use Polymorphine\Http\Context\CsrfProtection\CsrfToken;
+use Polymorphine\App\Context\CsrfProtection;
+use Polymorphine\App\Context\CsrfProtection\CsrfToken;
 
 
 class MockedCsrfProtection implements CsrfProtection

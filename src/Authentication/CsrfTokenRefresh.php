@@ -13,7 +13,7 @@ namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
 use Polymorphine\User\AuthenticatedUser;
-use Polymorphine\Http\Context\CsrfProtection;
+use Polymorphine\App\Context\CsrfProtection;
 use Psr\Http\Message\ServerRequestInterface;
 
 

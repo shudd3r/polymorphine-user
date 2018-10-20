@@ -2,16 +2,6 @@
     "name": "polymorphine/user",
     "description": "User authentication module",
     "type": "library",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "php": "^7.1",
-        "polymorphine/http": "@dev"
-    },
-    "require-dev": {
-        "polymorphine/cs": "@dev",
-        "phpunit/phpunit": "^7.0"
-    },
     "license": "MIT",
     "authors": [
         {
@@ -19,6 +9,17 @@
             "email": "q3.shudder@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.1"
+    },
+    "require-dev": {
+        "polymorphine/app": "@dev",
+        "polymorphine/message": "@dev",
+        "polymorphine/cs": "@dev",
+        "phpunit/phpunit": "^7.0"
+    },
     "autoload": {
         "psr-4": {
             "Polymorphine\\User\\": "src/"

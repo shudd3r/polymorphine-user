@@ -11,7 +11,7 @@
 
 namespace Polymorphine\User\Tests\Doubles;
 
-use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
+use Polymorphine\App\Context\ResponseHeaders\CookieSetup;
 
 
 class FakeCookieSetup extends CookieSetup

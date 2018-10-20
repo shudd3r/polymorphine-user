@@ -11,8 +11,8 @@
 
 namespace Polymorphine\User\Tests\Doubles;
 
-use Polymorphine\Http\Context\ResponseHeaders;
-use Polymorphine\Http\Context\ResponseHeaders\CookieSetup;
+use Polymorphine\App\Context\ResponseHeaders;
+use Polymorphine\App\Context\ResponseHeaders\CookieSetup;
 
 
 class MockedResponseHeaders implements ResponseHeaders

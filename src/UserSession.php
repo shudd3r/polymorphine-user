@@ -11,7 +11,7 @@
 
 namespace Polymorphine\User;
 
-use Polymorphine\Http\Context\Session;
+use Polymorphine\App\Context\Session;
 use Polymorphine\User\Data\Credentials;
 
 

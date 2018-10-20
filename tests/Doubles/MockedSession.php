@@ -11,8 +11,8 @@
 
 namespace Polymorphine\User\Tests\Doubles;
 
-use Polymorphine\Http\Context\Session\SessionData;
-use Polymorphine\Http\Context\Session;
+use Polymorphine\App\Context\Session\SessionData;
+use Polymorphine\App\Context\Session;
 
 
 class MockedSession implements Session
