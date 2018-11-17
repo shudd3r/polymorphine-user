@@ -12,7 +12,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^7.1"
+        "php": "^7.1",
+        "polymorphine/session": "@dev",
+        "polymorphine/csrf": "@dev"
     },
     "require-dev": {
         "polymorphine/app": "@dev",

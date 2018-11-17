@@ -11,11 +11,11 @@
 
 namespace Polymorphine\User\Tests\Doubles;
 
-use Polymorphine\App\Context\Session\SessionData;
-use Polymorphine\App\Context\Session;
+use Polymorphine\Session\SessionContext;
+use Polymorphine\Session\SessionContext\SessionData;
 
 
-class MockedSession implements Session
+class MockedSession implements SessionContext
 {
     public $regeneratedId = false;
 

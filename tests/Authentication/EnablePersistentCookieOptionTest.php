@@ -16,14 +16,14 @@ use Polymorphine\User\Authentication\EnablePersistentCookieOption;
 use Polymorphine\User\PersistentAuthCookie;
 use Polymorphine\User\Tests\Doubles\FakeServerRequest;
 use Polymorphine\User\Tests\Doubles\FakeAuthentication;
+use Polymorphine\User\Tests\Doubles\MockedCookie;
 use Polymorphine\User\Tests\Doubles\MockedUsersRepository;
-use Polymorphine\User\Tests\Doubles\MockedResponseHeaders;
 
 
 class EnablePersistentCookieOptionTest extends TestCase
 {
-    /** @var MockedResponseHeaders */
-    private $headers;
+    /** @var MockedCookie */
+    private $cookie;
 
     /** @var MockedUsersRepository */
     private $repository;
@@ -40,7 +40,7 @@ class EnablePersistentCookieOptionTest extends TestCase
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
         $this->assertFalse(isset($this->repository->token));
-        $this->assertFalse(isset($this->headers->data['Set-Cookie']));
+        $this->assertNull($this->cookie->value);
     }
 
     public function testSuccessfulAuthentication()
@@ -50,10 +50,9 @@ class EnablePersistentCookieOptionTest extends TestCase
 
         $this->assertTrue($auth->authenticate($request)->isLoggedIn());
         $this->assertTrue(isset($this->repository->token));
-        $this->assertTrue(isset($this->headers->data['Set-Cookie']));
+        $this->assertNotNull($this->cookie->value);
 
-        $cookie = $this->headers->cookieValue[PersistentAuthCookie::COOKIE_NAME];
-        [$key, $token] = explode(PersistentAuthCookie::TOKEN_SEPARATOR, $cookie);
+        [$key, $token] = explode(PersistentAuthCookie::TOKEN_SEPARATOR, $this->cookie->value);
         $this->assertSame(['id' => 1, 'key' => $key, 'token' => hash('sha256', $token)], $this->repository->token);
     }
 
@@ -64,7 +63,7 @@ class EnablePersistentCookieOptionTest extends TestCase
 
         $this->assertTrue($auth->authenticate($request)->isLoggedIn());
         $this->assertFalse(isset($this->repository->token));
-        $this->assertFalse(isset($this->headers->data['Set-Cookie']));
+        $this->assertNull($this->cookie->value);
     }
 
     private function request($optionChecked = true)
@@ -78,12 +77,12 @@ class EnablePersistentCookieOptionTest extends TestCase
 
     private function auth(bool $success = true)
     {
-        $this->headers    = new MockedResponseHeaders();
+        $this->cookie     = new MockedCookie();
         $this->repository = new MockedUsersRepository();
 
         return new EnablePersistentCookieOption(
             new FakeAuthentication($success),
-            new PersistentAuthCookie($this->headers, $this->repository)
+            new PersistentAuthCookie($this->cookie, $this->repository)
         );
     }
 }

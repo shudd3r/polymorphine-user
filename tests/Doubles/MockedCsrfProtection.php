@@ -11,15 +11,15 @@
 
 namespace Polymorphine\User\Tests\Doubles;
 
-use Polymorphine\App\Context\CsrfProtection;
-use Polymorphine\App\Context\CsrfProtection\CsrfToken;
+use Polymorphine\Csrf\CsrfContext;
+use Polymorphine\Csrf\Token;
 
 
-class MockedCsrfProtection implements CsrfProtection
+class MockedCsrfProtection implements CsrfContext
 {
     public $tokenReset = false;
 
-    public function appSignature(): CsrfToken
+    public function appSignature(): Token
     {
     }
 

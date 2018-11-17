@@ -30,10 +30,9 @@ class AuthMiddleware implements MiddlewareInterface
     {
         if (!$request->getAttribute(Authentication::AUTH_ATTR)) {
             $authenticated = $this->auth->authenticate($request)->isLoggedIn();
-            $request = $request->withAttribute(Authentication::AUTH_ATTR, $authenticated);
+            $request       = $request->withAttribute(Authentication::AUTH_ATTR, $authenticated);
         }
 
         return $handler->handle($request);
-
     }
 }

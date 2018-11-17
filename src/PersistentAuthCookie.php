@@ -11,24 +11,21 @@
 
 namespace Polymorphine\User;
 
-use Polymorphine\App\Context\ResponseHeaders;
+use Polymorphine\Headers\Cookie;
 use Polymorphine\User\Data\Credentials;
 
 
 class PersistentAuthCookie
 {
-    public const COOKIE_NAME     = 'remember';
     public const TOKEN_SEPARATOR = ':';
 
-    private $headers;
+    private $cookie;
     private $repository;
-    private $cookieOptions;
 
-    public function __construct(ResponseHeaders $headers, Repository $repository, array $cookieOptions = [])
+    public function __construct(Cookie $cookie, Repository $repository)
     {
-        $this->headers       = $headers;
-        $this->repository    = $repository;
-        $this->cookieOptions = $cookieOptions;
+        $this->cookie     = $cookie;
+        $this->repository = $repository;
     }
 
     public function setToken($id): void
@@ -37,15 +34,12 @@ class PersistentAuthCookie
         $token = bin2hex(random_bytes(32));
 
         $this->repository->setToken($id, $key, hash('sha256', $token));
-
-        $attributes = $this->cookieOptions + ['httpOnly' => true, 'sameSite' => 'Lax', 'expires' => false];
-        $this->headers->cookie(static::COOKIE_NAME, $attributes)
-                      ->value($key . static::TOKEN_SEPARATOR . $token);
+        $this->cookie->send($key . static::TOKEN_SEPARATOR . $token);
     }
 
     public function credentials(array $cookies): ?Credentials
     {
-        $token = $cookies[static::COOKIE_NAME] ?? null;
+        $token = $cookies[$this->cookie->name()] ?? null;
         if (!$token) { return null; }
 
         [$key, $hash] = explode(static::TOKEN_SEPARATOR, $token) + [false, false];
@@ -62,6 +56,6 @@ class PersistentAuthCookie
 
     public function clear(): void
     {
-        $this->headers->cookie(static::COOKIE_NAME)->remove();
+        $this->cookie->revoke();
     }
 }
