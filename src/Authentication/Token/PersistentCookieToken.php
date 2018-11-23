@@ -9,13 +9,16 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User;
+namespace Polymorphine\User\Authentication\Token;
 
+use Polymorphine\User\Authentication\Token;
 use Polymorphine\Headers\Cookie;
+use Polymorphine\User\Repository;
 use Polymorphine\User\Data\Credentials;
+use Psr\Http\Message\ServerRequestInterface;
 
 
-class PersistentAuthCookie
+class PersistentCookieToken implements Token
 {
     public const TOKEN_SEPARATOR = ':';
 
@@ -28,23 +31,24 @@ class PersistentAuthCookie
         $this->repository = $repository;
     }
 
-    public function setToken($id): void
+    public function enableForUser($userId): void
     {
         $key   = uniqid();
         $token = bin2hex(random_bytes(32));
 
-        $this->repository->setToken($id, $key, hash('sha256', $token));
+        $this->repository->setToken($userId, $key, hash('sha256', $token));
         $this->cookie->send($key . static::TOKEN_SEPARATOR . $token);
     }
 
-    public function credentials(array $cookies): ?Credentials
+    public function credentials(ServerRequestInterface $request): ?Credentials
     {
-        $token = $cookies[$this->cookie->name()] ?? null;
+        $cookies = $request->getCookieParams();
+        $token   = $cookies[$this->cookie->name()] ?? null;
         if (!$token) { return null; }
 
         [$key, $hash] = explode(static::TOKEN_SEPARATOR, $token) + [false, false];
         if (!$key || !$hash) {
-            $this->clear();
+            $this->revoke();
             return null;
         }
 
@@ -54,7 +58,7 @@ class PersistentAuthCookie
         ]);
     }
 
-    public function clear(): void
+    public function revoke(): void
     {
         $this->cookie->revoke();
     }

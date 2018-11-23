@@ -13,21 +13,20 @@ namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
 use Polymorphine\User\AuthenticatedUser;
-use Polymorphine\User\PersistentAuthCookie;
 use Psr\Http\Message\ServerRequestInterface;
 
 
-class EnablePersistentCookieOption implements Authentication
+class EnableTokenOption implements Authentication
 {
     public const REMEMBER_FIELD = 'remember';
 
     private $auth;
-    private $cookie;
+    private $token;
 
-    public function __construct(Authentication $auth, PersistentAuthCookie $cookie)
+    public function __construct(Authentication $auth, Token $token)
     {
-        $this->auth   = $auth;
-        $this->cookie = $cookie;
+        $this->auth  = $auth;
+        $this->token = $token;
     }
 
     public function authenticate(ServerRequestInterface $request): AuthenticatedUser
@@ -37,7 +36,7 @@ class EnablePersistentCookieOption implements Authentication
 
         $payload = $request->getParsedBody();
         if (isset($payload[static::REMEMBER_FIELD])) {
-            $this->cookie->setToken($user->id());
+            $this->token->enableForUser($user->id());
         }
 
         return $user;

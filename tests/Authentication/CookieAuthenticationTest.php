@@ -12,9 +12,9 @@
 namespace Polymorphine\User\Tests\Authentication;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\User\Authentication\CookieAuthentication;
+use Polymorphine\User\Authentication\TokenAuthentication;
 use Polymorphine\User\Tests\Doubles\MockedCookie;
-use Polymorphine\User\PersistentAuthCookie;
+use Polymorphine\User\Authentication\Token\PersistentCookieToken;
 use Polymorphine\User\UserSession;
 use Polymorphine\User\Data\Credentials;
 use Polymorphine\User\Tests\Doubles\FakeServerRequest;
@@ -36,13 +36,13 @@ class CookieAuthenticationTest extends TestCase
 
     public function testInstantiation()
     {
-        $this->assertInstanceOf(CookieAuthentication::class, $this->auth());
+        $this->assertInstanceOf(TokenAuthentication::class, $this->auth());
     }
 
     public function testSuccessfulAuthentication()
     {
         $token   = ['tokenKey' => 'key', 'token' => 'hash'];
-        $cookie  = $token['tokenKey'] . PersistentAuthCookie::TOKEN_SEPARATOR . $token['token'];
+        $cookie  = $token['tokenKey'] . PersistentCookieToken::TOKEN_SEPARATOR . $token['token'];
         $request = $this->request($cookie);
 
         $this->assertTrue($this->auth(true)->authenticate($request)->isLoggedIn());
@@ -67,7 +67,7 @@ class CookieAuthenticationTest extends TestCase
     public function testNotMatchingCookieToken()
     {
         $token   = ['tokenKey' => 'key', 'token' => 'hash'];
-        $cookie  = $token['tokenKey'] . PersistentAuthCookie::TOKEN_SEPARATOR . $token['token'];
+        $cookie  = $token['tokenKey'] . PersistentCookieToken::TOKEN_SEPARATOR . $token['token'];
         $request = $this->request($cookie);
 
         $this->assertFalse($this->auth(false)->authenticate($request)->isLoggedIn());
@@ -107,9 +107,9 @@ class CookieAuthenticationTest extends TestCase
             ? new MockedUsersRepository(new FakeAuthUser(1, 'Username'))
             : new MockedUsersRepository();
 
-        return new CookieAuthentication(
+        return new TokenAuthentication(
             new UserSession($this->session, $this->users),
-            new PersistentAuthCookie($this->cookie, $this->users)
+            new PersistentCookieToken($this->cookie, $this->users)
         );
     }
 }

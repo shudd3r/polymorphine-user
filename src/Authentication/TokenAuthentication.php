@@ -12,32 +12,29 @@
 namespace Polymorphine\User\Authentication;
 
 use Polymorphine\User\Authentication;
-use Polymorphine\User\AuthenticatedUser;
 use Polymorphine\User\UserSession;
-use Polymorphine\User\PersistentAuthCookie;
+use Polymorphine\User\AuthenticatedUser;
 use Psr\Http\Message\ServerRequestInterface;
 
 
-class CookieAuthentication implements Authentication
+class TokenAuthentication implements Authentication
 {
     private $userSession;
-    private $authCookie;
+    private $token;
 
-    public function __construct(UserSession $userSession, PersistentAuthCookie $authCookie)
+    public function __construct(UserSession $userSession, Token $token)
     {
         $this->userSession = $userSession;
-        $this->authCookie  = $authCookie;
+        $this->token       = $token;
     }
 
     public function authenticate(ServerRequestInterface $request): AuthenticatedUser
     {
-        $credentials = $this->authCookie->credentials($request->getCookieParams());
+        $credentials = $this->token->credentials($request);
         if (!$credentials) { return $this->userSession->user(); }
 
         $user = $this->userSession->signIn($credentials);
-        if (!$user->isLoggedIn()) {
-            $this->authCookie->clear();
-        }
+        if (!$user->isLoggedIn()) { $this->token->revoke(); }
 
         return $user;
     }

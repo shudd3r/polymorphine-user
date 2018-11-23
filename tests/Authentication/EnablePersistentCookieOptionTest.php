@@ -12,8 +12,8 @@
 namespace Polymorphine\User\Tests\Authentication;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\User\Authentication\EnablePersistentCookieOption;
-use Polymorphine\User\PersistentAuthCookie;
+use Polymorphine\User\Authentication\EnableTokenOption;
+use Polymorphine\User\Authentication\Token\PersistentCookieToken;
 use Polymorphine\User\Tests\Doubles\FakeServerRequest;
 use Polymorphine\User\Tests\Doubles\FakeAuthentication;
 use Polymorphine\User\Tests\Doubles\MockedCookie;
@@ -30,7 +30,7 @@ class EnablePersistentCookieOptionTest extends TestCase
 
     public function testInstantiation()
     {
-        $this->assertInstanceOf(EnablePersistentCookieOption::class, $this->auth());
+        $this->assertInstanceOf(EnableTokenOption::class, $this->auth());
     }
 
     public function testFailedAuthentication()
@@ -52,7 +52,7 @@ class EnablePersistentCookieOptionTest extends TestCase
         $this->assertTrue(isset($this->repository->token));
         $this->assertNotNull($this->cookie->value);
 
-        [$key, $token] = explode(PersistentAuthCookie::TOKEN_SEPARATOR, $this->cookie->value);
+        [$key, $token] = explode(PersistentCookieToken::TOKEN_SEPARATOR, $this->cookie->value);
         $this->assertSame(['id' => 1, 'key' => $key, 'token' => hash('sha256', $token)], $this->repository->token);
     }
 
@@ -70,7 +70,7 @@ class EnablePersistentCookieOptionTest extends TestCase
     {
         $request = new FakeServerRequest();
         if ($optionChecked) {
-            $request->parsed[EnablePersistentCookieOption::REMEMBER_FIELD] = true;
+            $request->parsed[EnableTokenOption::REMEMBER_FIELD] = true;
         }
         return $request;
     }
@@ -80,9 +80,9 @@ class EnablePersistentCookieOptionTest extends TestCase
         $this->cookie     = new MockedCookie();
         $this->repository = new MockedUsersRepository();
 
-        return new EnablePersistentCookieOption(
+        return new EnableTokenOption(
             new FakeAuthentication($success),
-            new PersistentAuthCookie($this->cookie, $this->repository)
+            new PersistentCookieToken($this->cookie, $this->repository)
         );
     }
 }
