@@ -11,7 +11,7 @@
 
 namespace Polymorphine\User;
 
-use Polymorphine\Session\SessionContext;
+use Polymorphine\Session\SessionContext\SessionData;
 use Polymorphine\User\Data\Credentials;
 
 
@@ -24,7 +24,7 @@ class UserSession
 
     private $authenticatedUser;
 
-    public function __construct(SessionContext $session, Repository $repository)
+    public function __construct(SessionData $session, Repository $repository)
     {
         $this->session    = $session;
         $this->repository = $repository;
@@ -37,12 +37,12 @@ class UserSession
 
     public function resume(): AuthenticatedUser
     {
-        $id = $this->session->data()->get(static::SESSION_USER_KEY);
+        $id = $this->session->get(static::SESSION_USER_KEY);
         if (!$id) { return $this->user(); }
 
         $this->authenticatedUser = $this->repository->getUser(new Credentials(['id' => $id]));
         if (!$this->authenticatedUser->isLoggedIn()) {
-            $this->session->data()->clear();
+            $this->session->clear();
         }
 
         return $this->authenticatedUser;
@@ -53,7 +53,7 @@ class UserSession
         $this->authenticatedUser = $this->repository->getUser($credentials);
         if ($this->authenticatedUser->isLoggedIn()) {
             $this->session->resetContext();
-            $this->session->data()->set(static::SESSION_USER_KEY, $this->authenticatedUser->id());
+            $this->session->set(static::SESSION_USER_KEY, $this->authenticatedUser->id());
         }
 
         return $this->authenticatedUser;

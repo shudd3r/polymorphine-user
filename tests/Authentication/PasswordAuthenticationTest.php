@@ -98,7 +98,7 @@ class PasswordAuthenticationTest extends TestCase
             : new MockedUsersRepository();
 
         return new PasswordAuthentication(
-            new UserSession($this->session, $this->users)
+            new UserSession($this->session->data(), $this->users)
         );
     }
 }

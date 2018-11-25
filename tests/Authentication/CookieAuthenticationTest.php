@@ -108,7 +108,7 @@ class CookieAuthenticationTest extends TestCase
             : new MockedUsersRepository();
 
         return new TokenAuthentication(
-            new UserSession($this->session, $this->users),
+            new UserSession($this->session->data(), $this->users),
             new PersistentCookieToken($this->cookie, $this->users)
         );
     }

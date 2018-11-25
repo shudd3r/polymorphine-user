@@ -67,7 +67,7 @@ class SessionAuthenticationTest extends TestCase
             : new MockedUsersRepository();
 
         return new SessionAuthentication(
-            new UserSession($this->session, $this->users)
+            new UserSession($this->session->data(), $this->users)
         );
     }
 }

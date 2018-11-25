@@ -36,7 +36,7 @@ class MockedSession implements SessionContext
         return $this->storage;
     }
 
-    public function resetContext(): void
+    public function reset(): void
     {
         $this->regeneratedId = true;
     }
