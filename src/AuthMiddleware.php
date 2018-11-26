@@ -19,20 +19,30 @@ use Psr\Http\Message\ResponseInterface;
 
 class AuthMiddleware implements MiddlewareInterface
 {
-    private $auth;
+    private $authMethods;
+    private $authQueue;
 
-    public function __construct(Authentication $auth)
+    public function __construct(Authentication ...$authMethods)
     {
-        $this->auth = $auth;
+        $this->authMethods = $authMethods;
+        $this->authQueue   = $authMethods;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if (!$request->getAttribute(Authentication::AUTH_ATTR)) {
-            $authenticated = $this->auth->authenticate($request)->isLoggedIn();
-            $request       = $request->withAttribute(Authentication::AUTH_ATTR, $authenticated);
+            $request = $this->authenticatedRequest($request);
         }
-
+        $this->authQueue = $this->authMethods;
         return $handler->handle($request);
+    }
+
+    private function authenticatedRequest(ServerRequestInterface $request): ServerRequestInterface
+    {
+        $authenticated = false;
+        while (!$authenticated && $authMethod = array_shift($this->authQueue)) {
+            $authenticated = $authMethod->authenticate($request)->isLoggedIn();
+        }
+        return $authenticated ? $request->withAttribute(Authentication::AUTH_ATTR, $authenticated) : $request;
     }
 }
