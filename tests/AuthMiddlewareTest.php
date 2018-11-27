@@ -12,7 +12,7 @@
 namespace Polymorphine\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\User\AuthMiddleware;
+use Polymorphine\User\ServiceProviders\AuthMiddleware;
 use Polymorphine\User\Tests\Doubles\FakeAuthentication;
 use Polymorphine\User\Tests\Doubles\FakeServerRequest;
 use Polymorphine\User\Tests\Doubles\MockedRequestHandler;

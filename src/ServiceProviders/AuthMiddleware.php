@@ -9,8 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User;
+namespace Polymorphine\User\ServiceProviders;
 
+use Polymorphine\User\Authentication;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
