@@ -58,4 +58,9 @@ class UserSession
 
         return $this->authenticatedUser;
     }
+
+    public function signOut(): void
+    {
+        $this->session->remove(self::SESSION_USER_KEY);
+    }
 }
