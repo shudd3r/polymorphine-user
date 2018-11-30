@@ -31,7 +31,7 @@ class AuthServices
     private $userSession;
     private $cookieToken;
 
-    public function __construct(SessionContextServices $context, Repository $repository)
+    public function __construct(ProcessContextServices $context, Repository $repository)
     {
         $this->context    = $context;
         $this->repository = $repository;
@@ -62,7 +62,7 @@ class AuthServices
     private function userSession(): UserSession
     {
         if ($this->userSession) { return $this->userSession; }
-        return $this->userSession = new UserSession($this->context->sessionData(), $this->repository);
+        return $this->userSession = new UserSession($this->context->sessionContext()->data(), $this->repository);
     }
 
     private function tokenAuth(): Authentication

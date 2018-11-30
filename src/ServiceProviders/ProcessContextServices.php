@@ -13,17 +13,17 @@ namespace Polymorphine\User\ServiceProviders;
 
 use Polymorphine\Csrf\CsrfContext;
 use Polymorphine\Headers\ResponseHeaders;
+use Polymorphine\Session\SessionContext;
 use Polymorphine\Session\SessionContext\NativeSessionContext;
-use Polymorphine\Session\SessionContext\SessionData;
 
 
-class SessionContextServices
+class ProcessContextServices
 {
     protected $sessionName;
     protected $cookieDirectives;
 
     private $responseHeaders;
-    private $sessionData;
+    private $sessionContext;
     private $csrfContext;
 
     public function __construct(string $name = 'PHPSESSID', array $directives = [])
@@ -37,26 +37,24 @@ class SessionContextServices
         return $this->responseHeaders ?: $this->responseHeaders = new ResponseHeaders();
     }
 
-    public function sessionData(): SessionData
+    public function sessionContext(): SessionContext
     {
-        return $this->sessionData ?: $this->sessionData = $this->createSessionData();
+        return $this->sessionContext ?: $this->sessionContext = $this->createSessionContext();
     }
 
-    public function csrfContext()
+    public function csrfContext(): CsrfContext
     {
         return $this->csrfContext ?: $this->csrfContext = $this->createCsrfContext();
     }
 
-    protected function createSessionData(): SessionData
+    protected function createSessionContext(): SessionContext
     {
         $cookieSetup = $this->responseHeaders()->cookieSetup()->directives($this->cookieDirectives);
-        $context     = new NativeSessionContext($cookieSetup->sessionCookie($this->sessionName));
-
-        return $context->data();
+        return new NativeSessionContext($cookieSetup->sessionCookie($this->sessionName));
     }
 
     protected function createCsrfContext(): CsrfContext
     {
-        return new CsrfContext\PersistentTokenContext($this->sessionData());
+        return new CsrfContext\PersistentTokenContext($this->sessionContext()->data());
     }
 }
