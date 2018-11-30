@@ -25,7 +25,7 @@ class SignOutMiddleware implements MiddlewareInterface
     private $session;
     private $token;
 
-    public function __construct(UserSession $session, Token $token)
+    public function __construct(UserSession $session, ?Token $token = null)
     {
         $this->session = $session;
         $this->token   = $token;
@@ -34,7 +34,7 @@ class SignOutMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $this->session->signOut();
-        $this->token->revoke();
+        if ($this->token) { $this->token->revoke(); }
 
         return $handler->handle($request->withoutAttribute(Authentication::AUTH_ATTR));
     }
