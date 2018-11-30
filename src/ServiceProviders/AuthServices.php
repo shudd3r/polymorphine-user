@@ -59,6 +59,16 @@ class AuthServices
             : new AuthMiddleware($auth);
     }
 
+    public function signOutMiddleware(): MiddlewareInterface
+    {
+        return new SignOutMiddleware($this->userSession(), $this->cookieToken);
+    }
+
+    public function user()
+    {
+        return $this->userSession()->user();
+    }
+
     private function userSession(): UserSession
     {
         if ($this->userSession) { return $this->userSession; }
