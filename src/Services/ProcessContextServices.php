@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\User\ServiceProviders;
+namespace Polymorphine\User\Services;
 
 use Polymorphine\Csrf\CsrfContext;
 use Polymorphine\Headers\ResponseHeaders;
