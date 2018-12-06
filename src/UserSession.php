@@ -17,8 +17,6 @@ use Polymorphine\User\Data\Credentials;
 
 class UserSession
 {
-    public const SESSION_USER_KEY = 'userId';
-
     private $repository;
     private $session;
 
@@ -37,7 +35,7 @@ class UserSession
 
     public function resume(): AuthenticatedUser
     {
-        $id = $this->session->get(static::SESSION_USER_KEY);
+        $id = $this->session->userId();
         if (!$id) { return $this->user(); }
 
         $this->authenticatedUser = $this->repository->getUser(new Credentials(['id' => $id]));
@@ -52,8 +50,7 @@ class UserSession
     {
         $this->authenticatedUser = $this->repository->getUser($credentials);
         if ($this->authenticatedUser->isLoggedIn()) {
-            $this->session->resetContext();
-            $this->session->set(static::SESSION_USER_KEY, $this->authenticatedUser->id());
+            $this->session->newUserContext($this->authenticatedUser->id());
         }
 
         return $this->authenticatedUser;
@@ -61,6 +58,6 @@ class UserSession
 
     public function signOut(): void
     {
-        $this->session->remove(self::SESSION_USER_KEY);
+        $this->session->newUserContext();
     }
 }

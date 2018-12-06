@@ -19,6 +19,7 @@ use Polymorphine\User\Tests\Doubles\FakeServerRequest;
 use Polymorphine\User\Tests\Doubles\FakeAuthUser;
 use Polymorphine\User\Tests\Doubles\MockedUsersRepository;
 use Polymorphine\User\Tests\Doubles\MockedSession;
+use Polymorphine\Session\SessionContext\SessionData;
 
 
 class SessionAuthenticationTest extends TestCase
@@ -43,7 +44,7 @@ class SessionAuthenticationTest extends TestCase
     public function testSessionResumed()
     {
         $userId = 1234;
-        $auth   = $this->auth(true, [UserSession::SESSION_USER_KEY => $userId]);
+        $auth   = $this->auth(true, [SessionData::USER_KEY => $userId]);
 
         $this->assertTrue($auth->authenticate(new FakeServerRequest())->isLoggedIn());
         $this->assertEquals(new Credentials(['id' => $userId]), $this->users->credentialsUsed);
@@ -52,7 +53,7 @@ class SessionAuthenticationTest extends TestCase
     public function testSessionWithInvalidUserId()
     {
         $userId = 1234;
-        $auth   = $this->auth(false, [UserSession::SESSION_USER_KEY => $userId]);
+        $auth   = $this->auth(false, [SessionData::USER_KEY => $userId]);
 
         $this->assertFalse($auth->authenticate(new FakeServerRequest())->isLoggedIn());
         $this->assertEquals(new Credentials(['id' => $userId]), $this->users->credentialsUsed);

@@ -41,7 +41,7 @@ class PasswordAuthenticationTest extends TestCase
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
         $this->assertNull($this->users->credentialsUsed);
-        $this->assertNull($this->session->data()->get(UserSession::SESSION_USER_KEY));
+        $this->assertNull($this->session->data()->userId());
     }
 
     public function testSuccessfulLoginAuthentication()
@@ -52,7 +52,7 @@ class PasswordAuthenticationTest extends TestCase
 
         $this->assertTrue($auth->authenticate($request)->isLoggedIn());
         $this->assertEquals(new Credentials($credentials), $this->users->credentialsUsed);
-        $this->assertSame(1, $this->session->data()->get(UserSession::SESSION_USER_KEY));
+        $this->assertSame('1', $this->session->data()->userId());
     }
 
     public function testSuccessfulEmailAuthentication()
@@ -63,7 +63,7 @@ class PasswordAuthenticationTest extends TestCase
 
         $this->assertTrue($auth->authenticate($request)->isLoggedIn());
         $this->assertEquals(new Credentials($credentials), $this->users->credentialsUsed);
-        $this->assertSame(1, $this->session->data()->get(UserSession::SESSION_USER_KEY));
+        $this->assertSame('1', $this->session->data()->userId());
     }
 
     public function testMissingAuthData()
@@ -74,7 +74,7 @@ class PasswordAuthenticationTest extends TestCase
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
         $this->assertNull($this->users->credentialsUsed);
-        $this->assertNull($this->session->data()->get(UserSession::SESSION_USER_KEY));
+        $this->assertNull($this->session->data()->userId());
     }
 
     private function request(string $username = null, string $password = null)
