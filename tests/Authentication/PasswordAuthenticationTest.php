@@ -52,7 +52,7 @@ class PasswordAuthenticationTest extends TestCase
 
         $this->assertTrue($auth->authenticate($request)->isLoggedIn());
         $this->assertEquals(new Credentials($credentials), $this->users->credentialsUsed);
-        $this->assertSame('1', $this->session->data()->userId());
+        $this->assertSame(1, $this->session->data()->userId());
     }
 
     public function testSuccessfulEmailAuthentication()
@@ -63,7 +63,7 @@ class PasswordAuthenticationTest extends TestCase
 
         $this->assertTrue($auth->authenticate($request)->isLoggedIn());
         $this->assertEquals(new Credentials($credentials), $this->users->credentialsUsed);
-        $this->assertSame('1', $this->session->data()->userId());
+        $this->assertSame(1, $this->session->data()->userId());
     }
 
     public function testMissingAuthData()

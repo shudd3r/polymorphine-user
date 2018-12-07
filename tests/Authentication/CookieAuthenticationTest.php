@@ -47,7 +47,7 @@ class CookieAuthenticationTest extends TestCase
 
         $this->assertTrue($this->auth(true)->authenticate($request)->isLoggedIn());
         $this->assertEquals(new Credentials($token), $this->users->credentialsUsed);
-        $this->assertSame('1', $this->session->data()->userId());
+        $this->assertSame(1, $this->session->data()->userId());
         $this->assertFalse($this->cookie->deleted);
         $this->assertTrue($this->session->regeneratedId);
     }
