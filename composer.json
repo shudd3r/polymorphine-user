@@ -14,7 +14,8 @@
     "require": {
         "php": "^7.1",
         "polymorphine/session": "@dev",
-        "polymorphine/csrf": "@dev"
+        "polymorphine/csrf": "@dev",
+        "polymorphine/middleware": "@dev"
     },
     "require-dev": {
         "polymorphine/app": "@dev",

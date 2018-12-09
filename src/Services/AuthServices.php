@@ -12,6 +12,7 @@
 namespace Polymorphine\User\Services;
 
 use Polymorphine\User\Repository;
+use Polymorphine\Headers\Cookie;
 use Polymorphine\User\UserSession;
 use Polymorphine\User\Authentication;
 use Polymorphine\User\Authentication\CsrfTokenRefresh;
@@ -20,6 +21,8 @@ use Polymorphine\User\Authentication\PasswordAuthentication;
 use Polymorphine\User\Authentication\SessionAuthentication;
 use Polymorphine\User\Authentication\TokenAuthentication;
 use Polymorphine\User\Authentication\Token\PersistentCookieToken;
+use Polymorphine\Middleware\MiddlewareChain;
+use Polymorphine\Middleware\LazyMiddleware;
 use Psr\Http\Server\MiddlewareInterface;
 
 
@@ -27,36 +30,42 @@ class AuthServices
 {
     private $context;
     private $repository;
-
-    private $userSession;
     private $cookieToken;
 
-    public function __construct(ProcessContextServices $context, Repository $repository)
-    {
-        $this->context    = $context;
-        $this->repository = $repository;
-    }
+    private $userSession;
 
-    public function setRememberCookie(string $name, array $directives = []): void
+    public function __construct(ProcessContextServices $context, Repository $repository, Cookie $cookie = null)
     {
-        $tokenCookie = $this->context->responseHeaders()->cookieSetup()->directives($directives);
-        $this->cookieToken = new PersistentCookieToken($tokenCookie->permanentCookie($name), $this->repository);
+        $this->context     = $context;
+        $this->repository  = $repository;
+        $this->cookieToken = !$cookie ?: new PersistentCookieToken($cookie, $repository);
     }
 
     public function sessionAuthentication(): MiddlewareInterface
     {
-        return $this->cookieToken
-            ? new AuthMiddleware(new SessionAuthentication($this->userSession()), $this->tokenAuth())
-            : new AuthMiddleware(new SessionAuthentication($this->userSession()));
+        return new MiddlewareChain(
+            $this->context->responseHeaders(),
+            $this->context->sessionContext(),
+            new LazyMiddleware(function () {
+                return new MiddlewareChain(
+                    $this->context->csrfContext(),
+                    $this->cookieToken
+                        ? new AuthMiddleware(new SessionAuthentication($this->userSession()), $this->tokenAuth())
+                        : new AuthMiddleware(new SessionAuthentication($this->userSession()))
+                );
+            })
+        );
     }
 
     public function passwordAuthentication(): MiddlewareInterface
     {
-        $auth = $this->csrfResetWrapper(new PasswordAuthentication($this->userSession()));
+        return new LazyMiddleware(function () {
+            $auth = $this->csrfResetWrapper(new PasswordAuthentication($this->userSession()));
 
-        return $this->cookieToken
-            ? new AuthMiddleware(new EnableTokenOption($auth, $this->cookieToken))
-            : new AuthMiddleware($auth);
+            return $this->cookieToken
+                ? new AuthMiddleware(new EnableTokenOption($auth, $this->cookieToken))
+                : new AuthMiddleware($auth);
+        });
     }
 
     public function signOutMiddleware(): MiddlewareInterface
@@ -71,8 +80,8 @@ class AuthServices
 
     private function userSession(): UserSession
     {
-        if ($this->userSession) { return $this->userSession; }
-        return $this->userSession = new UserSession($this->context->sessionContext()->data(), $this->repository);
+        return $this->userSession
+            ?: $this->userSession = new UserSession($this->context->sessionContext()->data(), $this->repository);
     }
 
     private function tokenAuth(): Authentication
