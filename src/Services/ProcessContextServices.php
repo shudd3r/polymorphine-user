@@ -47,6 +47,6 @@ class ProcessContextServices
     public function csrfContext()
     {
         return $this->csrfContext
-            ?: $this->csrfContext = new CsrfContext\PersistentTokenContext($this->sessionContext()->data());
+            ?: $this->csrfContext = new CsrfContext\PersistentTokenContext($this->sessionContext()->storage());
     }
 }

@@ -11,7 +11,7 @@
 
 namespace Polymorphine\User;
 
-use Polymorphine\Session\SessionContext\SessionData;
+use Polymorphine\Session\SessionStorage;
 use Polymorphine\User\Data\Credentials;
 
 
@@ -22,7 +22,7 @@ class UserSession
 
     private $authenticatedUser;
 
-    public function __construct(SessionData $session, Repository $repository)
+    public function __construct(SessionStorage $session, Repository $repository)
     {
         $this->session    = $session;
         $this->repository = $repository;

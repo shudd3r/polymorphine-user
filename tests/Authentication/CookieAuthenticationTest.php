@@ -47,7 +47,7 @@ class CookieAuthenticationTest extends TestCase
 
         $this->assertTrue($this->auth(true)->authenticate($request)->isLoggedIn());
         $this->assertEquals(new Credentials($token), $this->users->credentialsUsed);
-        $this->assertSame(1, $this->session->data()->userId());
+        $this->assertSame(1, $this->session->storage()->userId());
         $this->assertFalse($this->cookie->deleted);
         $this->assertTrue($this->session->regeneratedId);
     }
@@ -59,7 +59,7 @@ class CookieAuthenticationTest extends TestCase
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
         $this->assertNull($this->users->credentialsUsed);
-        $this->assertNull($this->session->data()->userId());
+        $this->assertNull($this->session->storage()->userId());
         $this->assertFalse($this->cookie->deleted);
         $this->assertFalse($this->session->regeneratedId);
     }
@@ -72,7 +72,7 @@ class CookieAuthenticationTest extends TestCase
 
         $this->assertFalse($this->auth(false)->authenticate($request)->isLoggedIn());
         $this->assertEquals(new Credentials($token), $this->users->credentialsUsed);
-        $this->assertNull($this->session->data()->userId());
+        $this->assertNull($this->session->storage()->userId());
         $this->assertTrue($this->cookie->deleted);
         $this->assertFalse($this->session->regeneratedId);
     }
@@ -84,7 +84,7 @@ class CookieAuthenticationTest extends TestCase
 
         $this->assertFalse($auth->authenticate($request)->isLoggedIn());
         $this->assertNull($this->users->credentialsUsed);
-        $this->assertNull($this->session->data()->userId());
+        $this->assertNull($this->session->storage()->userId());
         $this->assertTrue($this->cookie->deleted);
         $this->assertFalse($this->session->regeneratedId);
     }
@@ -108,7 +108,7 @@ class CookieAuthenticationTest extends TestCase
             : new MockedUsersRepository();
 
         return new TokenAuthentication(
-            new UserSession($this->session->data(), $this->users),
+            new UserSession($this->session->storage(), $this->users),
             new PersistentCookieToken($this->cookie, $this->users)
         );
     }

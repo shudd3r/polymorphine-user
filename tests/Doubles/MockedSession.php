@@ -12,26 +12,27 @@
 namespace Polymorphine\User\Tests\Doubles;
 
 use Polymorphine\Session\SessionContext;
-use Polymorphine\Session\SessionContext\SessionData;
+use Polymorphine\Session\SessionStorage;
+use Polymorphine\Session\SessionStorageProvider;
 
 
-class MockedSession implements SessionContext
+class MockedSession implements SessionContext, SessionStorageProvider
 {
     public $regeneratedId = false;
 
-    /** @var SessionData */
+    /** @var SessionStorage */
     private $storage;
 
     public function __construct(array $sessionData = [])
     {
-        $this->storage = new SessionData($this, $sessionData);
+        $this->storage = new SessionStorage($this, $sessionData);
     }
 
     public function start(): void
     {
     }
 
-    public function data(): SessionData
+    public function storage(): SessionStorage
     {
         return $this->storage;
     }
