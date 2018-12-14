@@ -14,6 +14,7 @@ namespace Polymorphine\User\Services;
 use Polymorphine\Csrf\CsrfContext;
 use Polymorphine\Headers\ResponseHeaders;
 use Polymorphine\Session\SessionContext;
+use Polymorphine\Session\SessionStorage\LazySessionStorage;
 
 
 class ProcessContextServices
@@ -46,7 +47,9 @@ class ProcessContextServices
 
     public function csrfContext()
     {
-        return $this->csrfContext
-            ?: $this->csrfContext = new CsrfContext\PersistentTokenContext($this->sessionContext()->storage());
+        if ($this->csrfContext) { return $this->csrfContext; }
+        return $this->csrfContext = new CsrfContext\PersistentTokenContext(
+            new LazySessionStorage($this->sessionContext())
+        );
     }
 }
